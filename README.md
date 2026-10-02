@@ -1,12 +1,86 @@
 # On My Mind List
 
-A calm, private place to capture what is occupying your mind, think it through, remember what you decided, and take action when an action is right.
+A calm, private place to get things out of your head — think them through, remember what you decided, act when an action is right, and intentionally let the rest go.
 
-This V1 is a Vite + React + TypeScript app styled with Tailwind CSS. It needs no account or backend to run.
+Short name in the UI: **On My Mind**.
 
-## Product purpose
+This V1 is a single-user, local-first web app (Vite + React + TypeScript + Tailwind). No account. No server. Your data stays in the browser on this device.
 
-On My Mind is a private thinking system, not a conventional task manager. Capture stays easy. Dump what's on your mind, link threads when something stands out, revisit threads, record thinking and decisions, and create a quick task without a journal entry first.
+---
+
+## Why this app exists
+
+Most “productivity” tools assume everything is a task, a project, or a deadline. Real mental load is messier:
+
+- worries and unfinished conversations
+- decisions you haven’t made yet
+- ideas that keep coming back
+- things you already thought about and forgot *why*
+- actions that are clear (“buy toothpaste”) and topics that aren’t (“should I move?”)
+
+**On My Mind** is a private thinking system, not a todo board.
+
+Its job is to reduce cognitive load by giving whatever is occupying your mind a trustworthy external place — without forcing you to classify it before you write.
+
+Guiding ideas:
+
+- Capture first; organize only when something stands out.
+- Thinking is valuable even when it produces no task.
+- Dropping something is not failure.
+- If a topic returns later, continue the same thread instead of duplicating it.
+
+---
+
+## Who it’s for
+
+One person who wants a quiet personal notebook for their mind — on a laptop or phone — and is fine with data living locally in the browser for now.
+
+It is **not** for teams, shared projects, calendars, or kanban-style project management.
+
+---
+
+## How to use it (mental model)
+
+Two entry paths:
+
+```text
+                  ON MY MIND
+                       │
+         ┌─────────────┴─────────────┐
+         ▼                           ▼
+      TODAY / JOURNAL            QUICK TASK
+   (dump what's here)         (you already know
+         │                     the action)
+         ▼
+   LINK A THREAD (optional)
+         │
+         ▼
+   THINK · DECIDE · ACT · LATER · DROP
+```
+
+### Core concepts
+
+| Concept | What it is |
+| --- | --- |
+| **Dump** | Free writing in today’s journal. No structure required. Empty dumps are not saved. |
+| **Thread** | A lasting topic you may return to across days (active / later / resolved / dropped). |
+| **Note** | Open writing on a thread (timeline). |
+| **Decision** | A marked outcome of thinking, kept in history. |
+| **Task** | A concrete action — standalone or attached to a thread (`open` / `done` / `dropped`). |
+| **Journal day** | A day you wrote dumps and/or had notes, decisions, or task activity. |
+
+**Thought** as a separate entity was removed. Dumps link directly to threads.
+
+### Typical day
+
+1. Open **Today** and dump whatever is on your mind.
+2. If something stands out, **Link a thread** (new or from past — any status becomes active again).
+3. Open the thread to add notes, decisions, and actions.
+4. Use **⌘/Ctrl+K** when you already know a task and don’t need a dump first.
+5. Browse **Journals** to see what a past day looked like.
+6. Use **Search** (`/`) to find old writing.
+
+---
 
 ## Run it
 
@@ -15,42 +89,133 @@ npm install
 npm run dev
 ```
 
-Open the local URL Vite prints. Production build: `npm run build`. Reset by clearing this site's local storage. Use **Export your data** first if you want a backup; **Import backup** restores a previous JSON export.
+Open the URL Vite prints (bound to `127.0.0.1`).
 
-## Authentication and privacy
+```sh
+npm run build    # production build
+npm run preview  # preview the build
+```
 
-There is no login in this V1. Single-user, local-first: `localStorage` holds journals, threads, and tasks on this device. Data is not encrypted and does not sync. Anyone with access to the same browser profile can read it. Export JSON backups regularly if the writing matters.
+Reset: clear this site’s local storage (export first if you care about the writing).  
+**Export your data** / **Import backup** in the sidebar for JSON backups.  
+**Load sample data** fills ~15 days of example dumps, threads, and tasks.
 
-Supabase (auth, sync, RLS) is deferred on purpose.
+---
 
-## What works now
+## Privacy & data
 
-- Today's journal: multiple timed mind dumps; each dump can link threads (new or from past)
-- Journals page: list of days → open a day for dumps, linked threads, and that day's thread notes/decisions
-- Create a thread from a dump, or link an existing thread to a dump
-- Revisit a previous thread into today (logged on today's journal)
-- Dates show time (dumps, notes, journals, “last on your mind”)
-- Thread notes, decisions, tasks, later / resolved / dropped
-- Quick capture (`⌘/Ctrl+K`), search (`/`), JSON export and import
-- Debounced local autosave and per-thread draft fields
-- Dark responsive UI (sidebar on desktop, bottom nav on mobile)
+- No login in this V1.
+- Data is stored in `localStorage` under the key `on-my-mind`.
+- Not encrypted. Not synced across devices.
+- Anyone with access to the same browser profile can read it.
+- Empty dumps (no text, no linked threads) are pruned on save/export so placeholders don’t clutter history.
+- Thread note/decision drafts are stored separately until you submit them on the thread page.
+
+Treat this like a private notebook on one device. Export regularly if the writing matters.
+
+---
+
+## What’s already implemented
+
+### Capture & journal
+
+- Today: multiple timed dumps; autosave as you type
+- Link new or past threads from a dump (pulling any status back to **active**)
+- Write again only when there is no empty placeholder dump
+- Delete dump via in-app confirm modal (threads are kept)
+- Empty dumps never appear in Journals and are not persisted
+- Journals: day list + day detail (dumps, linked threads, notes/decisions, short task activity including standalone tasks)
+
+### Threads
+
+- Statuses: active, later, resolved, dropped (tabs on Threads)
+- Thread page: notes, decisions, actions, timeline with muted kind chips, status controls
+- Bring into today’s journal (revisit)
+- Drafts for unsubmitted note/decision text
+
+### Tasks
+
+- Quick add (`⌘/Ctrl+K`) — optional thread link
+- Standalone or thread-linked
+- Tasks view tabs: open / done / dropped
+- Task events show on thread timelines and journal day digests
+
+### App shell
+
+- Dark theme, desktop sidebar + mobile bottom nav
+- Search across threads, dumps, notes, decisions, tasks
+- Hash routes (`#/today`, `#/journals/:day`, `#/threads/:id`, …)
+- Toast feedback; custom confirm modals (no browser `alert`/`confirm`)
+- Sample dataset for exploration
+
+### Technical
+
+- Vite + React 19 + TypeScript + Tailwind 4
+- Domain types in `src/types.ts`
+- Persistence + prune in `src/storage/storage.ts`
+- Shared modal chrome, kind chips, UI class helpers
+
+---
+
+## What’s next
+
+Ordered by product value (not a commitment to build everything):
+
+1. **Accounts & sync** — secure auth + multi-device (e.g. Supabase + RLS). Local-first remains the mental model until then.
+2. **Focus helper** — on a thread: next open action + recent progress, without becoming a dashboard.
+3. **Gentle resurfacing** — optionally surface threads not touched in a while (never guilt language).
+4. **Richer export** — Markdown / readable archive alongside JSON.
+5. **Optional reminders** — only if explicitly requested by the user.
+6. **Tests** — at least smoke tests for storage prune, journal digests, and thread/task status flows.
+
+Explicitly **out of V1 / not planned as core**: AI that silently edits your data, team sharing, kanban, streaks, analytics dashboards, OAuth, calendar integrations.
+
+---
+
+## Keyboard
+
+| Shortcut | Action |
+| --- | --- |
+| `⌘/Ctrl + K` | Quick add task |
+| `/` | Search (when not typing in a field) |
+| `Esc` | Close modal |
+
+---
 
 ## Code map
 
 ```text
-src/App.tsx                 Shell: routing, layout, view switch
-src/types.ts                Domain types
-src/styles.css              Tailwind import + theme tokens only
-src/lib/                    Dates, ids, search, DOM helpers
-src/storage/storage.ts      Load / save / export / import / drafts
-src/hooks/                  App data, hash route, outside-click
-src/components/             Shared UI pieces
+src/App.tsx                 Shell: routing, confirms, view switch
+src/types.ts                Domain model (Dump, Journal, Thread, Task, …)
+src/styles.css              Theme tokens + select/modal helpers
+src/lib/                    Dates, ids, search, journals digests, events, UI classes
+src/storage/storage.ts      Load / save / export / import / drafts / prune
+src/hooks/                  App data, hash route, session tabs
+src/components/             Modals, chips, dump editor, shared chrome
 src/views/                  Today, Journals, Threads, Tasks, Search, Thread detail
+src/seed/sampleData.ts      Optional dense sample state
 ```
+
+---
+
+## Product success (how to judge it)
+
+The app works if you can:
+
+1. Dump quickly without deciding “what type” something is.
+2. Think without being interrupted by structure.
+3. Continue an old topic instead of reinventing it.
+4. Record decisions and still see them later.
+5. Create a task directly when the action is already clear.
+6. Postpone or drop without shame.
+7. Look back at a day and understand what was on your mind.
+8. Trust that writing won’t vanish on a refresh (on this device).
+
+---
 
 ## Known limits
 
-- Local to one browser profile; no account or cross-device sync
-- Journals keyed by the browser's local calendar date
-- No automated tests yet (manual checklist recommended)
-- Supabase auth / sync / RLS still pending
+- One browser profile; no cross-device sync yet
+- Journal days use the browser’s local calendar date
+- No automated test suite yet
+- Spec file `OnMyMind.txt` described an earlier “Thought” model and full Supabase V1; this README reflects the **current** dump ↔ thread product

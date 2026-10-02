@@ -67,30 +67,3 @@ export function taskEventContent(status: TaskStatus, title: string) {
   if (status === 'dropped') return `Dropped · ${title}`;
   return `Reopened · ${title}`;
 }
-
-export function timelineLabel(event: ThreadEvent) {
-  switch (event.kind) {
-    case 'started':
-      return 'STARTED';
-    case 'thinking':
-      return 'NOTE';
-    case 'decision':
-      return 'DECISION';
-    case 'status':
-      return 'STATUS';
-    case 'task_added':
-      return 'TASK';
-    case 'task_done':
-      return 'TASK DONE';
-    case 'task_dropped':
-      return 'TASK DROPPED';
-    case 'task_reopened':
-      return 'TASK REOPENED';
-    case 'revisited':
-      return 'JOURNAL';
-    case 'linked':
-      return 'LINKED';
-    default:
-      return null;
-  }
-}

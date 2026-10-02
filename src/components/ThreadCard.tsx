@@ -1,13 +1,7 @@
 import { ArrowRight, Circle } from 'lucide-react';
 import { ago } from '../lib/dates';
+import { THREAD_STATUS_CHIP } from '../lib/ui';
 import type { Task, Thread } from '../types';
-
-const statusClass: Record<Thread['status'], string> = {
-  active: 'bg-panel text-accent',
-  later: 'bg-[#332c20] text-[#d0b184]',
-  resolved: 'bg-[#282a25] text-soft',
-  dropped: 'bg-[#282a25] text-soft',
-};
 
 export function ThreadCard({
   thread,
@@ -41,7 +35,7 @@ export function ThreadCard({
         </small>
       </span>
       <span
-        className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${statusClass[thread.status]}`}
+        className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${THREAD_STATUS_CHIP[thread.status]}`}
       >
         {thread.status}
       </span>

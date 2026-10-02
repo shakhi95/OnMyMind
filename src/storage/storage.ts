@@ -1,5 +1,5 @@
 import type { AppState, Journal } from '../types';
-import { emptyJournal, isEmptyDump } from '../types';
+import { isEmptyDump } from '../types';
 
 export const STORAGE_KEY = 'on-my-mind';
 
@@ -89,5 +89,3 @@ export function writeDraft(key: string, value: string) {
     return false;
   }
 }
-
-export { emptyJournal };

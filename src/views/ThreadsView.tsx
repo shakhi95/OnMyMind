@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Circle, Plus } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { ThreadCard } from '../components/ThreadCard';
+import { useSessionTab } from '../hooks/useSessionTab';
+import { THREADS_TAB_KEY, primaryBtnClass } from '../lib/ui';
 import type { Task, Thread, ThreadStatus } from '../types';
 
 const TABS: { id: ThreadStatus; label: string; emptyTitle: string; emptyText: string }[] = [
@@ -32,17 +33,7 @@ const TABS: { id: ThreadStatus; label: string; emptyTitle: string; emptyText: st
   },
 ];
 
-const TAB_STORAGE_KEY = 'on-my-mind.threads-tab';
-
-function readInitialTab(): ThreadStatus {
-  try {
-    const stored = sessionStorage.getItem(TAB_STORAGE_KEY) as ThreadStatus | null;
-    if (stored && TABS.some((tab) => tab.id === stored)) return stored;
-  } catch {
-    /* ignore */
-  }
-  return 'active';
-}
+const TAB_IDS = TABS.map((tab) => tab.id);
 
 export function ThreadsView({
   threads,
@@ -55,19 +46,11 @@ export function ThreadsView({
   onOpen: (id: string) => void;
   onAdd: () => void;
 }) {
-  const [tab, setTab] = useState<ThreadStatus>(readInitialTab);
+  const [tab, setTab] = useSessionTab(THREADS_TAB_KEY, TAB_IDS, 'active');
   const current = TABS.find((item) => item.id === tab) || TABS[0];
   const filtered = threads
     .filter((thread) => thread.status === tab)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(TAB_STORAGE_KEY, tab);
-    } catch {
-      /* ignore */
-    }
-  }, [tab]);
 
   const counts = Object.fromEntries(
     TABS.map((item) => [item.id, threads.filter((thread) => thread.status === item.id).length]),
@@ -80,11 +63,7 @@ export function ThreadsView({
         title="Your threads"
         description="Active topics, things set aside, and what’s resolved or let go."
       >
-        <button
-          type="button"
-          onClick={onAdd}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-accent bg-accent px-3 py-2 text-[11px] font-semibold text-[#222329] hover:bg-[#d0d1e0]"
-        >
+        <button type="button" onClick={onAdd} className={primaryBtnClass}>
           <Plus size={15} /> Add a thread
         </button>
       </PageHeader>

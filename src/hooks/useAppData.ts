@@ -9,12 +9,12 @@ import {
   taskEventKind,
 } from '../lib/threadEvents';
 import {
-  emptyJournal,
   exportState,
   loadState,
   parseImportPayload,
   saveState,
 } from '../storage/storage';
+import { emptyJournal } from '../types';
 import { buildSampleState } from '../seed/sampleData';
 import type { AppState, Journal, TaskStatus, Thread, ThreadEventKind, ThreadStatus } from '../types';
 

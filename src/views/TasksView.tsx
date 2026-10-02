@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
 import { ListChecks, Plus } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { TaskRow } from '../components/TaskRow';
+import { useSessionTab } from '../hooks/useSessionTab';
+import { TASKS_TAB_KEY, primaryBtnClass } from '../lib/ui';
 import type { Task, TaskStatus, Thread } from '../types';
 
 const TABS: { id: TaskStatus; label: string; emptyTitle: string; emptyText: string }[] = [
@@ -26,17 +27,7 @@ const TABS: { id: TaskStatus; label: string; emptyTitle: string; emptyText: stri
   },
 ];
 
-const TAB_STORAGE_KEY = 'on-my-mind.tasks-tab';
-
-function readInitialTab(): TaskStatus {
-  try {
-    const stored = sessionStorage.getItem(TAB_STORAGE_KEY) as TaskStatus | null;
-    if (stored && TABS.some((tab) => tab.id === stored)) return stored;
-  } catch {
-    /* ignore */
-  }
-  return 'open';
-}
+const TAB_IDS = TABS.map((tab) => tab.id);
 
 export function TasksView({
   tasks,
@@ -51,7 +42,7 @@ export function TasksView({
   onAdd: () => void;
   onOpenThread: (id: string) => void;
 }) {
-  const [tab, setTab] = useState<TaskStatus>(readInitialTab);
+  const [tab, setTab] = useSessionTab(TASKS_TAB_KEY, TAB_IDS, 'open');
   const current = TABS.find((item) => item.id === tab) || TABS[0];
   const filtered = tasks
     .filter((task) => task.status === tab)
@@ -59,14 +50,6 @@ export function TasksView({
       if (tab === 'open') return b.createdAt.localeCompare(a.createdAt);
       return (b.updatedAt || b.createdAt).localeCompare(a.updatedAt || a.createdAt);
     });
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(TAB_STORAGE_KEY, tab);
-    } catch {
-      /* ignore */
-    }
-  }, [tab]);
 
   const counts = Object.fromEntries(
     TABS.map((item) => [item.id, tasks.filter((task) => task.status === item.id).length]),
@@ -79,11 +62,7 @@ export function TasksView({
         title="Your tasks"
         description="Things you chose to do. Nothing more complicated than that."
       >
-        <button
-          type="button"
-          onClick={onAdd}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-accent bg-accent px-3 py-2 text-[11px] font-semibold text-[#222329] hover:bg-[#d0d1e0]"
-        >
+        <button type="button" onClick={onAdd} className={primaryBtnClass}>
           <Plus size={15} /> Add a task
         </button>
       </PageHeader>

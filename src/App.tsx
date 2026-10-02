@@ -8,6 +8,7 @@ import { Topbar } from './components/Topbar';
 import { useAppData } from './hooks/useAppData';
 import { useGlobalShortcuts, useHashRoute } from './hooks/useHashRoute';
 import { getSearchResults } from './lib/search';
+import { THREADS_TAB_KEY } from './lib/ui';
 import type { SearchResult } from './types';
 import { JournalsView } from './views/JournalsView';
 import { SearchView } from './views/SearchView';
@@ -67,7 +68,7 @@ export default function App() {
     const thread = data.threads.find((item) => item.id === id);
     if (thread) {
       try {
-        sessionStorage.setItem('on-my-mind.threads-tab', thread.status);
+        sessionStorage.setItem(THREADS_TAB_KEY, thread.status);
       } catch {
         /* ignore */
       }

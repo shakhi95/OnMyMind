@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { isTypingTarget } from '../lib/dom';
+import { THREADS_TAB_KEY } from '../lib/ui';
 import type { View } from '../types';
 import { VIEWS } from '../types';
 
@@ -16,7 +17,7 @@ export function useHashRoute() {
     }
     if (route[0] === 'later') {
       try {
-        sessionStorage.setItem('on-my-mind.threads-tab', 'later');
+        sessionStorage.setItem(THREADS_TAB_KEY, 'later');
       } catch {
         /* ignore */
       }

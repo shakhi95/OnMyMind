@@ -3,13 +3,9 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { KindChip, kindDotClass, toneFromEventKind } from '../components/KindChip';
 import { TaskRow } from '../components/TaskRow';
 import { ago, dateTimeText } from '../lib/dates';
+import { fieldClass, primaryBtnClass, THREAD_STATUS_CHIP } from '../lib/ui';
 import { draftKey, readDraft, writeDraft } from '../storage/storage';
 import type { Task, TaskStatus, Thread, ThreadEventKind, ThreadStatus } from '../types';
-
-const fieldClass =
-  'w-full rounded-md border border-line bg-[#141518] px-3 py-3 text-[13px] leading-relaxed text-ink outline-none placeholder:text-soft focus:border-edge focus:shadow-[0_0_0_2px_#36402e]';
-const primaryBtnClass =
-  'inline-flex cursor-pointer items-center gap-2 rounded-md border border-accent bg-accent px-3 py-2 text-[11px] font-semibold text-[#222329] hover:bg-[#d0d1e0]';
 
 export function ThreadDetailView({
   thread,
@@ -50,13 +46,6 @@ export function ThreadDetailView({
   const done = tasks.filter((item) => item.status === 'done');
   const dropped = tasks.filter((item) => item.status === 'dropped');
 
-  const statusClass: Record<ThreadStatus, string> = {
-    active: 'bg-panel text-accent',
-    later: 'bg-[#332c20] text-[#d0b184]',
-    resolved: 'bg-[#282a25] text-soft',
-    dropped: 'bg-[#282a25] text-soft',
-  };
-
   return (
     <div className="max-w-[790px] rounded-[11px] border border-line bg-surface px-7 py-6 max-[620px]:px-4">
       <button
@@ -74,7 +63,7 @@ export function ThreadDetailView({
         {thread.title}
       </h1>
       <div className="mb-1 flex flex-wrap items-center gap-2.5 text-[10px] text-soft">
-        <span className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${statusClass[thread.status]}`}>
+        <span className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${THREAD_STATUS_CHIP[thread.status]}`}>
           {thread.status}
         </span>
         <span>Started {dateTimeText(thread.createdAt)}</span>
