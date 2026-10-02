@@ -6,6 +6,9 @@ Short name in the UI: **On My Mind**.
 
 This V1 is a single-user, local-first web app (Vite + React + TypeScript + Tailwind). No account. No server. Your data stays in the browser on this device.
 
+**Live site:** [https://shakhi95.github.io/OnMyMind/](https://shakhi95.github.io/OnMyMind/)  
+Pushes to `main` rebuild and redeploy via GitHub Actions → GitHub Pages (see [Deploy](#deploy)).
+
 ---
 
 ## Why this app exists
@@ -99,6 +102,37 @@ npm run preview  # preview the build
 Reset: clear this site’s local storage (export first if you care about the writing).  
 **Export your data** / **Import backup** in the sidebar for JSON backups.  
 **Load sample data** fills ~15 days of example dumps, threads, and tasks.
+
+---
+
+## Deploy
+
+Hosted on **GitHub Pages** from this repo. Workflow: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+
+How it works:
+
+1. Push (or merge) to `main`.
+2. Actions runs `npm ci` → `npm run build`.
+3. Uploads `dist/` and deploys to Pages.
+4. App is at `https://shakhi95.github.io/OnMyMind/`.
+
+`vite.config.ts` sets `base: '/OnMyMind/'` so JS/CSS URLs match that path. Hash routes (`#/today`, …) work without a server rewrite.
+
+**One-time repo setting** (if Pages is not on yet):
+
+1. Open [Settings → Pages](https://github.com/shakhi95/OnMyMind/settings/pages).
+2. Under **Build and deployment → Source**, choose **GitHub Actions**.
+3. Push to `main` (or run the workflow manually under Actions).
+
+Manual redeploy: Actions → **Deploy to GitHub Pages** → **Run workflow**.
+
+Local preview of the Pages build:
+
+```sh
+npm run build && npm run preview
+```
+
+Then open the preview URL Vite prints (still uses `/OnMyMind/` asset paths).
 
 ---
 
