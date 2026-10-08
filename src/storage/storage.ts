@@ -67,25 +67,3 @@ export function exportState(data: AppState, filename: string) {
   anchor.click();
   URL.revokeObjectURL(anchor.href);
 }
-
-export function draftKey(topicId: string, kind: 'note' | 'decision') {
-  return `${STORAGE_KEY}.draft.${topicId}.${kind}`;
-}
-
-export function readDraft(key: string) {
-  try {
-    return localStorage.getItem(key) || '';
-  } catch {
-    return '';
-  }
-}
-
-export function writeDraft(key: string, value: string) {
-  try {
-    if (value) localStorage.setItem(key, value);
-    else localStorage.removeItem(key);
-    return true;
-  } catch {
-    return false;
-  }
-}

@@ -10,6 +10,7 @@ export function DumpEditor({
   topics,
   linkableTopics,
   onChange,
+  onBlurSave,
   onRemove,
   onCreateTopic,
   onLinkTopic,
@@ -21,6 +22,7 @@ export function DumpEditor({
   topics: Topic[];
   linkableTopics: Topic[];
   onChange: (content: string) => void;
+  onBlurSave: () => void;
   onRemove: () => void;
   onCreateTopic: (title: string) => void;
   onLinkTopic: (topicId: string) => void;
@@ -54,6 +56,7 @@ export function DumpEditor({
           className="min-h-[120px] w-full resize-y border-0 bg-transparent text-[15px] leading-[1.75] text-ink outline-none placeholder:text-soft"
           value={dump.content}
           onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlurSave}
           placeholder="Dump whatever's here. No structure needed."
           aria-label={`Mind dump from ${dateTimeText(dump.createdAt)}`}
         />

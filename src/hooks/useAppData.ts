@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { dayKey } from '../lib/dates';
 import { makeId } from '../lib/ids';
 import {
@@ -49,24 +49,56 @@ export function useAppData(userId: string) {
   const [saved, setSaved] = useState(true);
   const [saveError, setSaveError] = useState(false);
   const [toast, setToast] = useState('');
-  const [readyToSave, setReadyToSave] = useState(false);
   const today = dayKey();
+
+  const dataRef = useRef(data);
+  const canPersist = useRef(false);
+  const dumpDirty = useRef(false);
+
+  dataRef.current = data;
+
+  const persist = useCallback(
+    async (state?: AppState) => {
+      if (!canPersist.current) return;
+      const payload = state ?? dataRef.current;
+      dumpDirty.current = false;
+      setSaved(false);
+      const ok = await saveUserState(userId, payload);
+      setSaved(ok);
+      setSaveError(!ok);
+    },
+    [userId],
+  );
+
+  const commit = useCallback(
+    (updater: (current: AppState) => AppState, shouldPersist: boolean) => {
+      setData((current) => {
+        const next = updater(current);
+        dataRef.current = next;
+        if (shouldPersist) void persist(next);
+        return next;
+      });
+    },
+    [persist],
+  );
 
   useEffect(() => {
     let cancelled = false;
+    canPersist.current = false;
     setLoading(true);
     setLoadError(false);
-    setReadyToSave(false);
     setData(emptyState());
+    dataRef.current = emptyState();
     setSaved(true);
     setSaveError(false);
 
     loadUserState(userId)
       .then((state) => {
         if (cancelled) return;
+        dataRef.current = state;
         setData(state);
         setLoading(false);
-        setReadyToSave(true);
+        canPersist.current = true;
       })
       .catch(() => {
         if (cancelled) return;
@@ -76,29 +108,18 @@ export function useAppData(userId: string) {
 
     return () => {
       cancelled = true;
+      canPersist.current = false;
     };
   }, [userId]);
 
   useEffect(() => {
-    if (!readyToSave || loading) return;
-
-    setSaved(false);
-    const timer = window.setTimeout(() => {
-      void saveUserState(userId, data).then((ok) => {
-        setSaved(ok);
-        setSaveError(!ok);
-      });
-    }, 250);
-
     const flush = () => {
-      void saveUserState(userId, data);
+      if (!canPersist.current) return;
+      void saveUserState(userId, dataRef.current);
     };
     window.addEventListener('pagehide', flush);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('pagehide', flush);
-    };
-  }, [data, userId, readyToSave, loading]);
+    return () => window.removeEventListener('pagehide', flush);
+  }, [userId]);
 
   useEffect(() => {
     if (!toast) return;
@@ -107,45 +128,56 @@ export function useAppData(userId: string) {
   }, [toast]);
 
   const changeJournal = useCallback(
-    (change: (current: Journal) => Journal) => {
-      setData((current) => ({
+    (change: (current: Journal) => Journal, shouldPersist: boolean) => {
+      commit((current) => ({
         ...current,
         journals: {
           ...current.journals,
           [today]: change(current.journals[today] || emptyJournal()),
         },
-      }));
+      }), shouldPersist);
     },
-    [today],
+    [commit, today],
   );
 
   const addDump = useCallback(() => {
     const now = new Date().toISOString();
-    changeJournal((current) => ({
-      dumps: [
-        ...current.dumps,
-        { id: makeId(), content: '', createdAt: now, updatedAt: now, topicIds: [] },
-      ],
-    }));
+    changeJournal(
+      (current) => ({
+        dumps: [
+          ...current.dumps,
+          { id: makeId(), content: '', createdAt: now, updatedAt: now, topicIds: [] },
+        ],
+      }),
+      true,
+    );
   }, [changeJournal]);
 
+  /** Local-only while typing; cloud save happens on blur via flushSave. */
   const updateDump = useCallback(
     (id: string, content: string) => {
       const now = new Date().toISOString();
-      changeJournal((current) => ({
-        dumps: current.dumps.map((dump) =>
-          dump.id === id ? { ...dump, content, updatedAt: now } : dump,
-        ),
-      }));
+      dumpDirty.current = true;
+      changeJournal(
+        (current) => ({
+          dumps: current.dumps.map((dump) =>
+            dump.id === id ? { ...dump, content, updatedAt: now } : dump,
+          ),
+        }),
+        false,
+      );
     },
     [changeJournal],
   );
 
+  const flushSave = useCallback(() => {
+    if (!dumpDirty.current) return;
+    void persist();
+  }, [persist]);
+
   const removeDump = useCallback(
     (id: string) => {
-      changeJournal((current) => ({
-        dumps: current.dumps.filter((dump) => dump.id !== id),
-      }));
+      changeJournal((current) => ({ dumps: current.dumps.filter((dump) => dump.id !== id) }), true);
     },
     [changeJournal],
   );
@@ -155,7 +187,7 @@ export function useAppData(userId: string) {
       const now = new Date().toISOString();
       const taskId = makeId();
       const trimmed = title.trim();
-      setData((current) => ({
+      commit((current) => ({
         ...current,
         tasks: [{ id: taskId, title: trimmed, status: 'open', topicId, createdAt: now }, ...current.tasks],
         topics: topicId
@@ -168,28 +200,28 @@ export function useAppData(userId: string) {
                 : topic,
             )
           : current.topics,
-      }));
+      }), true);
       setToast('Saved. One less thing to remember.');
     },
-    [today],
+    [commit, today],
   );
 
-  const addTopic = useCallback((title: string) => {
-    const trimmed = title.trim();
-    if (!trimmed) return;
-    const now = new Date().toISOString();
-    const topic = topicWithStarted(makeId(), trimmed, now);
-    setData((current) => ({
-      ...current,
-      topics: [topic, ...current.topics],
-    }));
-    setToast('A topic to return to, whenever you need it.');
-    return topic.id;
-  }, []);
+  const addTopic = useCallback(
+    (title: string) => {
+      const trimmed = title.trim();
+      if (!trimmed) return;
+      const now = new Date().toISOString();
+      const topic = topicWithStarted(makeId(), trimmed, now);
+      commit((current) => ({ ...current, topics: [topic, ...current.topics] }), true);
+      setToast('A topic to return to, whenever you need it.');
+      return topic.id;
+    },
+    [commit],
+  );
 
   const setTaskStatus = useCallback(
     (id: string, status: TaskStatus) => {
-      setData((current) => {
+      commit((current) => {
         const task = current.tasks.find((item) => item.id === id);
         const now = new Date().toISOString();
         const kind = taskEventKind(status);
@@ -212,16 +244,16 @@ export function useAppData(userId: string) {
                 )
               : current.topics,
         };
-      });
+      }, true);
     },
-    [today],
+    [commit, today],
   );
 
   const linkTopicToDump = useCallback(
     (dumpId: string, topicId: string) => {
       const now = new Date().toISOString();
       let message: string | null = null;
-      setData((current) => {
+      commit((current) => {
         const topic = current.topics.find((item) => item.id === topicId);
         const page = current.journals[today] || emptyJournal();
         const dump = page.dumps.find((item) => item.id === dumpId);
@@ -262,10 +294,10 @@ export function useAppData(userId: string) {
             item.id === topicId ? appendEvents({ ...item, status: nextStatus }, ...events) : item,
           ),
         };
-      });
+      }, true);
       if (message) setToast(message);
     },
-    [today],
+    [commit, today],
   );
 
   const createTopicOnDump = useCallback(
@@ -276,7 +308,7 @@ export function useAppData(userId: string) {
       const topic = topicWithStarted(makeId(), trimmed, now, [
         makeEvent('linked', 'Started from today’s dump', { createdAt: now, date: today }),
       ]);
-      setData((current) => {
+      commit((current) => {
         const page = current.journals[today] || emptyJournal();
         return {
           ...current,
@@ -290,21 +322,23 @@ export function useAppData(userId: string) {
             })),
           },
         };
-      });
+      }, true);
       setToast('A topic to return to, whenever you need it.');
       return topic.id;
     },
-    [today],
+    [commit, today],
   );
 
   const unlinkTopicFromDump = useCallback(
     (dumpId: string, topicId: string) => {
-      changeJournal((current) =>
-        mapDump(current, dumpId, (dump) => ({
-          ...dump,
-          topicIds: dump.topicIds.filter((id) => id !== topicId),
-          updatedAt: new Date().toISOString(),
-        })),
+      changeJournal(
+        (current) =>
+          mapDump(current, dumpId, (dump) => ({
+            ...dump,
+            topicIds: dump.topicIds.filter((id) => id !== topicId),
+            updatedAt: new Date().toISOString(),
+          })),
+        true,
       );
       setToast('Topic unlinked from this dump.');
     },
@@ -314,7 +348,7 @@ export function useAppData(userId: string) {
   const revisitTopicInJournal = useCallback(
     (topicId: string, dumpId?: string) => {
       let message: string | null = null;
-      setData((current) => {
+      commit((current) => {
         const topic = current.topics.find((item) => item.id === topicId);
         const page = current.journals[today] || emptyJournal();
         if (!topic) return current;
@@ -367,18 +401,24 @@ export function useAppData(userId: string) {
             item.id === topicId ? appendEvents({ ...item, status: nextStatus }, ...events) : item,
           ),
         };
-      });
+      }, true);
       if (message) setToast(message);
     },
-    [today],
+    [commit, today],
   );
 
-  const updateTopic = useCallback((id: string, change: (topic: Topic) => Topic) => {
-    setData((current) => ({
-      ...current,
-      topics: current.topics.map((topic) => (topic.id === id ? change(topic) : topic)),
-    }));
-  }, []);
+  const updateTopic = useCallback(
+    (id: string, change: (topic: Topic) => Topic) => {
+      commit(
+        (current) => ({
+          ...current,
+          topics: current.topics.map((topic) => (topic.id === id ? change(topic) : topic)),
+        }),
+        true,
+      );
+    },
+    [commit],
+  );
 
   const addNote = useCallback(
     (id: string, content: string, kind: Extract<TopicEventKind, 'note' | 'decision'> = 'note') => {
@@ -413,12 +453,17 @@ export function useAppData(userId: string) {
     exportState(data, `on-my-mind-${today}.json`);
   }, [data, today]);
 
-  const doImport = useCallback(async (file: File) => {
-    const raw = await file.text();
-    const next = parseImportPayload(raw);
-    setData(next);
-    setToast('Backup restored to your account.');
-  }, []);
+  const doImport = useCallback(
+    async (file: File) => {
+      const raw = await file.text();
+      const next = parseImportPayload(raw);
+      dataRef.current = next;
+      setData(next);
+      void persist(next);
+      setToast('Backup restored to your account.');
+    },
+    [persist],
+  );
 
   const journal = data.journals[today] || emptyJournal();
 
@@ -438,6 +483,7 @@ export function useAppData(userId: string) {
     openTasks: data.tasks.filter((task) => task.status === 'open'),
     addDump,
     updateDump,
+    flushSave,
     removeDump,
     addTask,
     addTopic,

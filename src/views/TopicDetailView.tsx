@@ -1,10 +1,9 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { KindChip, kindDotClass, toneFromEventKind } from '../components/KindChip';
 import { TaskRow } from '../components/TaskRow';
 import { ago, dateTimeText } from '../lib/dates';
 import { fieldClass, primaryBtnClass, TOPIC_STATUS_CHIP } from '../lib/ui';
-import { draftKey, readDraft, writeDraft } from '../storage/storage';
 import type { Task, TaskStatus, Topic, TopicEventKind, TopicStatus } from '../types';
 
 export function TopicDetailView({
@@ -26,21 +25,10 @@ export function TopicDetailView({
   onBack: () => void;
   onRevisit: () => void;
 }) {
-  const noteDraftKey = draftKey(topic.id, 'note');
-  const decisionDraftKey = draftKey(topic.id, 'decision');
-  const [note, setNote] = useState(() => readDraft(noteDraftKey));
-  const [decision, setDecision] = useState(() => readDraft(decisionDraftKey));
+  const [note, setNote] = useState('');
+  const [decision, setDecision] = useState('');
   const [task, setTask] = useState('');
-  const [draftSaved, setDraftSaved] = useState(true);
   const [showSettled, setShowSettled] = useState(false);
-
-  useEffect(() => {
-    const timer = window.setTimeout(
-      () => setDraftSaved(writeDraft(noteDraftKey, note) && writeDraft(decisionDraftKey, decision)),
-      180,
-    );
-    return () => window.clearTimeout(timer);
-  }, [decision, decisionDraftKey, note, noteDraftKey]);
 
   const open = tasks.filter((item) => item.status === 'open');
   const done = tasks.filter((item) => item.status === 'done');
@@ -93,11 +81,6 @@ export function TopicDetailView({
             placeholder="Whatever's on your mind about this… No structure needed."
             aria-label="Write a note about this topic"
           />
-          <span className={`mb-2 block text-[10px] ${draftSaved ? 'text-soft' : 'text-[#d4a18e]'}`}>
-            {draftSaved
-              ? 'Your draft stays on this device until you save it.'
-              : 'Could not save the draft locally—keep this page open.'}
-          </span>
           <div className="flex justify-end">
             <button className={primaryBtnClass} type="submit">
               Save note <ArrowRight size={14} />

@@ -7,10 +7,9 @@ import { isEmptyDump } from '../types';
 export function TodayView({
   journal,
   topics,
-  saved,
-  saveError,
   onAddDump,
   onUpdateDump,
+  onFlushSave,
   onRemoveDump,
   onCreateTopic,
   onLinkTopic,
@@ -19,10 +18,9 @@ export function TodayView({
 }: {
   journal: Journal;
   topics: Topic[];
-  saved: boolean;
-  saveError: boolean;
   onAddDump: () => void;
   onUpdateDump: (id: string, content: string) => void;
+  onFlushSave: () => void;
   onRemoveDump: (id: string) => void;
   onCreateTopic: (dumpId: string, title: string) => void;
   onLinkTopic: (dumpId: string, topicId: string) => void;
@@ -58,7 +56,7 @@ export function TodayView({
         </p>
       </div>
 
-      <section className="overflow-visible rounded-xl border border-line bg-gradient-to-br from-[#191a20] to-surface shadow-[0_14px_44px_#0002]">
+      <section className="overflow-visible rounded-xl border border-line bg-gradient-to-br from-[#191a20] to-surface pb-4 shadow-[0_14px_44px_#0002]">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div className="flex items-center gap-2.5">
             <span className="grid place-items-center text-accent">
@@ -85,6 +83,7 @@ export function TodayView({
             topics={topics}
             linkableTopics={linkableTopics}
             onChange={(content) => onUpdateDump(dump.id, content)}
+            onBlurSave={onFlushSave}
             onRemove={() => onRemoveDump(dump.id)}
             onCreateTopic={(title) => onCreateTopic(dump.id, title)}
             onLinkTopic={(topicId) => onLinkTopic(dump.id, topicId)}
@@ -92,18 +91,6 @@ export function TodayView({
             onOpenTopic={onOpenTopic}
           />
         ))}
-
-        <p
-          className={`px-5 pb-5 text-[10px] max-[620px]:px-4 ${
-            saveError ? 'text-[#d4a18e]' : 'text-soft'
-          }`}
-        >
-          {saveError
-            ? 'Could not save right now — your writing is still here in this window.'
-            : saved
-              ? 'Saved on this device as you write.'
-              : 'Saving…'}
-        </p>
       </section>
     </>
   );

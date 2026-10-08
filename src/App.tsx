@@ -62,6 +62,7 @@ function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: ()
     openTasks,
     addDump,
     updateDump,
+    flushSave,
     removeDump,
     createTopicOnDump,
     linkTopicToDump,
@@ -227,10 +228,9 @@ function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: ()
             <TodayView
               journal={journal}
               topics={data.topics}
-              saved={saved}
-              saveError={saveError}
               onAddDump={addDump}
               onUpdateDump={updateDump}
+              onFlushSave={flushSave}
               onRemoveDump={requestRemoveDump}
               onCreateTopic={createTopicOnDump}
               onLinkTopic={linkTopicToDump}

@@ -161,7 +161,6 @@ Then open the preview URL Vite prints (still uses `/OnMyMind/` asset paths).
 - App state (journals, topics, tasks) is stored as JSON in Supabase `user_data`.
 - Not end-to-end encrypted. Trust your Supabase project and password hygiene.
 - Empty dumps (no text, no linked topics) are pruned on save/export so placeholders don’t clutter history.
-- Topic note/decision drafts may still use browser storage until you submit them on the topic page.
 
 Export regularly if the writing matters.
 
@@ -183,8 +182,6 @@ Export regularly if the writing matters.
 - Statuses: active, later, resolved, dropped (tabs on Topics)
 - Topic page: notes, decisions, actions, timeline with muted kind chips, status controls
 - Bring into today’s journal (revisit)
-- Drafts for unsubmitted note/decision text
-
 ### Tasks
 
 - Quick add (`⌘/Ctrl+K`) — optional topic link
@@ -240,7 +237,7 @@ src/App.tsx                 Auth gate, routing, confirms, view switch
 src/types.ts                Domain model (Dump, Journal, Topic, Task, …)
 src/styles.css              Theme tokens + select/modal helpers
 src/lib/                    Dates, ids, search, journals, events, supabase client
-src/storage/storage.ts      Prune / export / import / drafts
+src/storage/storage.ts      Prune / export / import
 src/storage/supabaseState.ts Cloud load / upsert of AppState
 supabase/schema.sql         user_data table + RLS + signup trigger
 src/hooks/                  Auth, app data, hash route, session tabs
