@@ -49,6 +49,10 @@ export function useHashRoute() {
     return () => window.removeEventListener('hashchange', syncRoute);
   }, [syncRoute]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view, selectedTopic, selectedJournalDay]);
+
   const go = useCallback((next: View) => {
     setSelectedTopic(null);
     setSelectedJournalDay(null);
