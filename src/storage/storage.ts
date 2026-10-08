@@ -55,7 +55,7 @@ export function isAppState(value: unknown): value is AppState {
 
 export function parseImportPayload(raw: string): AppState {
   const parsed = JSON.parse(raw) as unknown;
-  if (!isAppState(parsed)) throw new Error('Invalid On My Mind backup file.');
+  if (!isAppState(parsed)) throw new Error('Invalid OnMyMind backup file.');
   return prunePersistedState(parsed);
 }
 

@@ -2,7 +2,7 @@
 
 A calm, private place to get things out of your head — think them through, remember what you decided, act when an action is right, and intentionally let the rest go.
 
-Short name in the UI: **On My Mind**.
+Short name in the UI: **OnMyMind**.
 
 Vite + React + TypeScript + Tailwind. Sign in with a username and password; your data is stored in Supabase (Postgres) so you can use it from any device.
 
@@ -21,7 +21,7 @@ Most “productivity” tools assume everything is a task, a project, or a deadl
 - things you already thought about and forgot *why*
 - actions that are clear (“buy toothpaste”) and topics that aren’t (“should I move?”)
 
-**On My Mind** is a private thinking system, not a todo board.
+**OnMyMind** is a private thinking system, not a todo board.
 
 Its job is to reduce cognitive load by giving whatever is occupying your mind a trustworthy external place — without forcing you to classify it before you write.
 
@@ -47,7 +47,7 @@ It is **not** for teams, shared projects, calendars, or kanban-style project man
 Two entry paths:
 
 ```text
-                  ON MY MIND
+                  OnMyMind
                        │
          ┌─────────────┴─────────────┐
          ▼                           ▼

@@ -36,7 +36,7 @@ export function LoginView({
           </span>
           <div>
             <div className="font-display text-[18px] font-bold tracking-[-0.8px] text-ink">
-              on my mind<span className="text-accent">.</span>
+              OnMyMind
             </div>
             <p className="mt-0.5 text-[12px] text-soft">
               {mode === 'signin' ? 'Sign in to continue' : 'Create an account'}

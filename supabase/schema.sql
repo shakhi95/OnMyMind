@@ -1,4 +1,4 @@
--- On My Mind — run once in Supabase SQL Editor
+-- OnMyMind — run once in Supabase SQL Editor
 
 create table if not exists public.user_data (
   user_id uuid primary key references auth.users (id) on delete cascade,

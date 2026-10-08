@@ -170,7 +170,7 @@ function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: ()
     try {
       await doImport(file);
     } catch {
-      setToast('Could not import that file. Choose a valid On My Mind JSON backup.');
+      setToast('Could not import that file. Choose a valid OnMyMind JSON backup.');
     }
   };
 

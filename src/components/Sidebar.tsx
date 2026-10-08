@@ -47,7 +47,7 @@ export function Sidebar({
           <Sparkles size={18} />
         </span>
         <span>
-          on my mind<span className="text-accent">.</span>
+          OnMyMind
         </span>
       </a>
 
