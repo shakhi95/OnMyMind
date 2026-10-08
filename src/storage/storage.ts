@@ -1,8 +1,6 @@
 import type { AppState, Journal } from '../types';
 import { isEmptyDump } from '../types';
 
-export const STORAGE_KEY = 'on-my-mind';
-
 export const emptyState = (): AppState => ({ journals: {}, topics: [], tasks: [] });
 
 /** Drop placeholder dumps and journal days with nothing real left. */
@@ -19,27 +17,6 @@ export function prunePersistedState(data: AppState): AppState {
     topics: data.topics,
     tasks: data.tasks,
   };
-}
-
-export function loadState(): AppState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyState();
-    const saved = JSON.parse(raw) as unknown;
-    if (!isAppState(saved)) return emptyState();
-    return prunePersistedState(saved);
-  } catch {
-    return emptyState();
-  }
-}
-
-export function saveState(data: AppState): boolean {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prunePersistedState(data)));
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export function isAppState(value: unknown): value is AppState {

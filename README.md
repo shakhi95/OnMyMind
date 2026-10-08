@@ -185,7 +185,7 @@ Revisit splitting when exports are multi‑MB or saves feel slow on mobile data 
 
 ### Capture & journal
 
-- Today: multiple timed dumps; autosave as you type
+- Today: multiple timed dumps; cloud save on blur (and when you add/link/delete)
 - Link new or past topics from a dump (pulling any status back to **active**)
 - Write again only when there is no empty placeholder dump
 - Delete dump via in-app confirm modal (topics are kept)
