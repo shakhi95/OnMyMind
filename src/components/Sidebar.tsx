@@ -6,6 +6,7 @@ import {
   Circle,
   Clock3,
   ListChecks,
+  LogOut,
   Sparkles,
 } from 'lucide-react';
 import { NavButton } from './NavButton';
@@ -20,6 +21,7 @@ export function Sidebar({
   onExport,
   onImport,
   onLoadSample,
+  onSignOut,
 }: {
   view: View;
   selectedTopic: string | null;
@@ -29,6 +31,7 @@ export function Sidebar({
   onExport: () => void;
   onImport: (file: File) => void;
   onLoadSample: () => void;
+  onSignOut: () => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -91,7 +94,7 @@ export function Sidebar({
           <span className="grid h-7 w-7 place-items-center rounded-[9px] bg-hover text-accent">⌑</span>
           <div>
             <strong className="mb-1 block text-[11px] text-ink">Your private space</strong>
-            <small className="block text-[11px] text-soft">Saved on this device</small>
+            <small className="block text-[11px] text-soft">Saved to your account</small>
           </div>
         </div>
         <button
@@ -114,6 +117,13 @@ export function Sidebar({
           className="flex cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-[11px] text-soft hover:text-ink"
         >
           <Sparkles size={15} /> Load sample data
+        </button>
+        <button
+          type="button"
+          onClick={onSignOut}
+          className="flex cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-[11px] text-soft hover:text-ink"
+        >
+          <LogOut size={15} /> Sign out
         </button>
         <input
           ref={fileRef}

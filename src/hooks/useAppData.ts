@@ -8,12 +8,8 @@ import {
   taskEventContent,
   taskEventKind,
 } from '../lib/topicEvents';
-import {
-  exportState,
-  loadState,
-  parseImportPayload,
-  saveState,
-} from '../storage/storage';
+import { exportState, parseImportPayload, emptyState } from '../storage/storage';
+import { loadUserState, saveUserState } from '../storage/supabaseState';
 import { emptyJournal } from '../types';
 import { buildSampleState } from '../seed/sampleData';
 import type { AppState, Journal, TaskStatus, Topic, TopicEventKind, TopicStatus } from '../types';
@@ -47,29 +43,63 @@ function topicWithStarted(
   };
 }
 
-export function useAppData() {
-  const [data, setData] = useState<AppState>(loadState);
+export function useAppData(userId: string) {
+  const [data, setData] = useState<AppState>(emptyState);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [saved, setSaved] = useState(true);
   const [saveError, setSaveError] = useState(false);
   const [toast, setToast] = useState('');
+  const [readyToSave, setReadyToSave] = useState(false);
   const today = dayKey();
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
+    setReadyToSave(false);
+    setData(emptyState());
+    setSaved(true);
+    setSaveError(false);
+
+    loadUserState(userId)
+      .then((state) => {
+        if (cancelled) return;
+        setData(state);
+        setLoading(false);
+        setReadyToSave(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoadError(true);
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (!readyToSave || loading) return;
+
     setSaved(false);
     const timer = window.setTimeout(() => {
-      const ok = saveState(data);
-      setSaved(ok);
-      setSaveError(!ok);
+      void saveUserState(userId, data).then((ok) => {
+        setSaved(ok);
+        setSaveError(!ok);
+      });
     }, 250);
+
     const flush = () => {
-      saveState(data);
+      void saveUserState(userId, data);
     };
     window.addEventListener('pagehide', flush);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener('pagehide', flush);
     };
-  }, [data]);
+  }, [data, userId, readyToSave, loading]);
 
   useEffect(() => {
     if (!toast) return;
@@ -388,7 +418,7 @@ export function useAppData() {
     const raw = await file.text();
     const next = parseImportPayload(raw);
     setData(next);
-    setToast('Backup restored on this device.');
+    setToast('Backup restored to your account.');
   }, []);
 
   const loadSampleData = useCallback(() => {
@@ -401,6 +431,8 @@ export function useAppData() {
   return {
     data,
     today,
+    loading,
+    loadError,
     saved,
     saveError,
     toast,

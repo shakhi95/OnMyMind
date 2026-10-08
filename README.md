@@ -4,7 +4,7 @@ A calm, private place to get things out of your head — think them through, rem
 
 Short name in the UI: **On My Mind**.
 
-This V1 is a single-user, local-first web app (Vite + React + TypeScript + Tailwind). No account. No server. Your data stays in the browser on this device.
+Vite + React + TypeScript + Tailwind. Sign in with a username and password; your data is stored in Supabase (Postgres) so you can use it from any device.
 
 **Live site:** [https://shakhi95.github.io/OnMyMind/](https://shakhi95.github.io/OnMyMind/)  
 Pushes to `main` rebuild and redeploy via GitHub Actions → GitHub Pages (see [Deploy](#deploy)).
@@ -36,7 +36,7 @@ Guiding ideas:
 
 ## Who it’s for
 
-One person who wants a quiet personal notebook for their mind — on a laptop or phone — and is fine with data living locally in the browser for now.
+Someone who wants a quiet personal notebook for their mind — on a laptop or phone — with a private account so writing follows them across devices.
 
 It is **not** for teams, shared projects, calendars, or kanban-style project management.
 
@@ -87,21 +87,36 @@ Two entry paths:
 
 ## Run it
 
+### Supabase (once)
+
+1. Create a project (or use an existing one).
+2. **Authentication → Providers → Email**: enabled; turn **Confirm email OFF**.
+3. **Authentication → URL Configuration**: Site URL `https://shakhi95.github.io/OnMyMind/`; add redirect URLs `http://127.0.0.1:5173/**` and `https://shakhi95.github.io/OnMyMind/**`.
+4. **SQL Editor**: paste and run [`supabase/schema.sql`](supabase/schema.sql).
+5. **Project Settings → API Keys**: copy **Project URL** and the **Publishable key** (browser-safe with RLS). Do **not** put a **Secret key** in the app.
+
+Forgot password for a user: **Authentication → Users** → set/reset password (UI usernames map to `username@onmymind.local`).
+
+### Local app
+
 ```sh
+cp .env.example .env
+# fill VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY
+
 npm install
 npm run dev
 ```
 
-Open the URL Vite prints (bound to `127.0.0.1`).
+Open the URL Vite prints (bound to `127.0.0.1`). Sign up or sign in with a username and password.
 
 ```sh
 npm run build    # production build
 npm run preview  # preview the build
 ```
 
-Reset: clear this site’s local storage (export first if you care about the writing).  
-**Export your data** / **Import backup** in the sidebar for JSON backups.  
-**Load sample data** fills ~15 days of example dumps, topics, and tasks.
+**Export your data** / **Import backup** in the sidebar for JSON backups (import overwrites your cloud state).  
+**Load sample data** fills ~15 days of example dumps, topics, and tasks.  
+**Sign out** returns you to the login screen.
 
 ---
 
@@ -112,11 +127,16 @@ Hosted on **GitHub Pages** from this repo. Workflow: [`.github/workflows/deploy.
 How it works:
 
 1. Push (or merge) to `main`.
-2. Actions runs `npm ci` → `npm run build`.
+2. Actions runs `npm ci` → `npm run build` (with Supabase env secrets).
 3. Uploads `dist/` and deploys to Pages.
 4. App is at `https://shakhi95.github.io/OnMyMind/`.
 
 `vite.config.ts` sets `base: '/OnMyMind/'` so JS/CSS URLs match that path. Hash routes (`#/today`, …) work without a server rewrite.
+
+**One-time repo secrets** (Settings → Secrets and variables → Actions):
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY` (the Publishable key from the dashboard — not a Secret key)
 
 **One-time repo setting** (if Pages is not on yet):
 
@@ -138,14 +158,13 @@ Then open the preview URL Vite prints (still uses `/OnMyMind/` asset paths).
 
 ## Privacy & data
 
-- No login in this V1.
-- Data is stored in `localStorage` under the key `on-my-mind`.
-- Not encrypted. Not synced across devices.
-- Anyone with access to the same browser profile can read it.
+- Username/password login (Supabase Auth). Each account only sees its own row via RLS.
+- App state (journals, topics, tasks) is stored as JSON in Supabase `user_data`.
+- Not end-to-end encrypted. Trust your Supabase project and password hygiene.
 - Empty dumps (no text, no linked topics) are pruned on save/export so placeholders don’t clutter history.
-- Topic note/decision drafts are stored separately until you submit them on the topic page.
+- Topic note/decision drafts may still use browser storage until you submit them on the topic page.
 
-Treat this like a private notebook on one device. Export regularly if the writing matters.
+Export regularly if the writing matters.
 
 ---
 
@@ -186,7 +205,8 @@ Treat this like a private notebook on one device. Export regularly if the writin
 
 - Vite + React 19 + TypeScript + Tailwind 4
 - Domain types in `src/types.ts`
-- Persistence + prune in `src/storage/storage.ts`
+- Auth + cloud AppState via Supabase (`src/hooks/useAuth.ts`, `src/storage/supabaseState.ts`)
+- Prune / export / import helpers in `src/storage/storage.ts`
 - Shared modal chrome, kind chips, UI class helpers
 
 ---
@@ -195,14 +215,13 @@ Treat this like a private notebook on one device. Export regularly if the writin
 
 Ordered by product value (not a commitment to build everything):
 
-1. **Accounts & sync** — secure auth + multi-device (e.g. Supabase + RLS). Local-first remains the mental model until then.
-2. **Focus helper** — on a topic: next open action + recent progress, without becoming a dashboard.
-3. **Gentle resurfacing** — optionally surface topics not touched in a while (never guilt language).
-4. **Richer export** — Markdown / readable archive alongside JSON.
-5. **Optional reminders** — only if explicitly requested by the user.
-6. **Tests** — at least smoke tests for storage prune, journal digests, and topic/task status flows.
+1. **Focus helper** — on a topic: next open action + recent progress, without becoming a dashboard.
+2. **Gentle resurfacing** — optionally surface topics not touched in a while (never guilt language).
+3. **Richer export** — Markdown / readable archive alongside JSON.
+4. **Optional reminders** — only if explicitly requested by the user.
+5. **Tests** — at least smoke tests for storage prune, journal digests, and topic/task status flows.
 
-Explicitly **out of V1 / not planned as core**: AI that silently edits your data, team sharing, kanban, streaks, analytics dashboards, OAuth, calendar integrations.
+Explicitly **not planned as core**: AI that silently edits your data, team sharing, kanban, streaks, analytics dashboards, OAuth, calendar integrations.
 
 ---
 
@@ -219,14 +238,16 @@ Explicitly **out of V1 / not planned as core**: AI that silently edits your data
 ## Code map
 
 ```text
-src/App.tsx                 Shell: routing, confirms, view switch
+src/App.tsx                 Auth gate, routing, confirms, view switch
 src/types.ts                Domain model (Dump, Journal, Topic, Task, …)
 src/styles.css              Theme tokens + select/modal helpers
-src/lib/                    Dates, ids, search, journals digests, events, UI classes
-src/storage/storage.ts      Load / save / export / import / drafts / prune
-src/hooks/                  App data, hash route, session tabs
+src/lib/                    Dates, ids, search, journals, events, supabase client
+src/storage/storage.ts      Prune / export / import / drafts
+src/storage/supabaseState.ts Cloud load / upsert of AppState
+supabase/schema.sql         user_data table + RLS + signup trigger
+src/hooks/                  Auth, app data, hash route, session tabs
 src/components/             Modals, chips, dump editor, shared chrome
-src/views/                  Today, Journals, Topics, Tasks, Search, Topic detail
+src/views/                  Login, Today, Journals, Topics, Tasks, Search, Topic detail
 src/seed/sampleData.ts      Optional dense sample state
 ```
 
@@ -243,13 +264,13 @@ The app works if you can:
 5. Create a task directly when the action is already clear.
 6. Postpone or drop without shame.
 7. Look back at a day and understand what was on your mind.
-8. Trust that writing won’t vanish on a refresh (on this device).
+8. Trust that writing won’t vanish on a refresh (once saved to your account).
 
 ---
 
 ## Known limits
 
-- One browser profile; no cross-device sync yet
+- Online required after login (no offline mode)
+- Last write wins across devices (no realtime multi-tab sync)
 - Journal days use the browser’s local calendar date
 - No automated test suite yet
-- Spec file `OnMyMind.txt` described an earlier “Thought” model and full Supabase V1; this README reflects the **current** dump ↔ topic product

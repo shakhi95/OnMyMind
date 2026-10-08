@@ -6,11 +6,13 @@ import { Sidebar } from './components/Sidebar';
 import { Toast } from './components/Toast';
 import { Topbar } from './components/Topbar';
 import { useAppData } from './hooks/useAppData';
+import { useAuth } from './hooks/useAuth';
 import { useGlobalShortcuts, useHashRoute } from './hooks/useHashRoute';
 import { getSearchResults } from './lib/search';
 import { TOPICS_TAB_KEY } from './lib/ui';
 import type { SearchResult } from './types';
 import { JournalsView } from './views/JournalsView';
+import { LoginView } from './views/LoginView';
 import { SearchView } from './views/SearchView';
 import { TasksView } from './views/TasksView';
 import { TopicDetailView } from './views/TopicDetailView';
@@ -26,10 +28,31 @@ type ConfirmState = {
   onConfirm: () => void;
 };
 
+function LoadingShell({ message }: { message: string }) {
+  return (
+    <div className="grid min-h-dvh place-items-center px-4">
+      <p className="text-[13px] text-soft">{message}</p>
+    </div>
+  );
+}
+
 export default function App() {
+  const { userId, loading, authError, signIn, signUp, signOut } = useAuth();
+
+  if (loading) return <LoadingShell message="Checking session…" />;
+  if (!userId) {
+    return <LoginView authError={authError} onSignIn={signIn} onSignUp={signUp} />;
+  }
+
+  return <AuthenticatedApp userId={userId} onSignOut={signOut} />;
+}
+
+function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: () => void }) {
   const {
     data,
     today,
+    loading,
+    loadError,
     saved,
     saveError,
     toast,
@@ -52,7 +75,7 @@ export default function App() {
     doExport,
     doImport,
     loadSampleData,
-  } = useAppData();
+  } = useAppData(userId);
 
   const { view, selectedTopic, selectedJournalDay, go, openTopicRoute, openJournalDay } = useHashRoute();
   const [dialog, setDialog] = useState<'task' | 'topic' | null>(null);
@@ -116,15 +139,41 @@ export default function App() {
 
   const requestLoadSample = () => {
     setConfirm({
-      eyebrow: 'Replace local data',
+      eyebrow: 'Replace your cloud data',
       title: 'Load sample data?',
       message:
-        'This replaces everything on this device with sample data for the last 15 days. Export first if you care about current writing.',
+        'This replaces everything in your account with sample data for the last 15 days. Export first if you care about current writing.',
       confirmLabel: 'Load sample',
       danger: true,
       onConfirm: () => loadSampleData(),
     });
   };
+
+  if (loading) return <LoadingShell message="Loading your space…" />;
+
+  if (loadError) {
+    return (
+      <div className="grid min-h-dvh place-items-center px-4">
+        <div className="max-w-sm text-center">
+          <p className="mb-4 text-[13px] text-[#d7b1a5]">Couldn’t load your data. Check your connection and try again.</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="cursor-pointer rounded-lg border-0 bg-panel px-3 py-2 text-[13px] text-ink hover:bg-hover"
+          >
+            Reload
+          </button>
+          <button
+            type="button"
+            onClick={onSignOut}
+            className="ml-2 cursor-pointer rounded-lg border border-line bg-transparent px-3 py-2 text-[13px] text-soft hover:text-ink"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const currentTopic = data.topics.find((topic) => topic.id === selectedTopic);
   const searchResults = getSearchResults(data, query);
@@ -148,6 +197,7 @@ export default function App() {
         onExport={doExport}
         onImport={handleImport}
         onLoadSample={requestLoadSample}
+        onSignOut={onSignOut}
       />
 
       <main className="min-w-0 flex-1">
