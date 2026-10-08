@@ -158,11 +158,26 @@ Then open the preview URL Vite prints (still uses `/OnMyMind/` asset paths).
 ## Privacy & data
 
 - Username/password login (Supabase Auth). Each account only sees its own row via RLS.
-- App state (journals, topics, tasks) is stored as JSON in Supabase `user_data`.
+- App state (journals, topics, tasks) is stored as JSON in Supabase `user_data` (see below).
 - Not end-to-end encrypted. Trust your Supabase project and password hygiene.
 - Empty dumps (no text, no linked topics) are pruned on save/export so placeholders don’t clutter history.
 
 Export regularly if the writing matters.
+
+### Data storage & future migration
+
+Each account stores journals, topics, and tasks as **one JSON document** per user (`user_data.state`). That is intentional for V1: simple sync, and enough for a few mid-heavy users for a long time.
+
+**This is not a dead end.** Moving to relational tables later does **not** require throwing away user data. A migration would:
+
+1. Snapshot / export `user_data` (or ask users to use **Export your data**).
+2. Read each `state` blob and insert rows into tables (dumps, topics, events, tasks).
+3. Deploy the app that reads/writes tables.
+4. Keep the old blob as backup briefly, then drop it.
+
+Risks to avoid at cutover: shipping table-only code before migrating rows, or deleting `user_data` without a backup. Export JSON remains the portable backup format either way.
+
+Revisit splitting when exports are multi‑MB or saves feel slow on mobile data — not before.
 
 ---
 
