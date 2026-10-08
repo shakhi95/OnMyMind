@@ -37,7 +37,6 @@ export function ConfirmDialog({
             </button>
             <button
               type="button"
-              autoFocus
               onClick={() => {
                 onConfirm();
                 onClose();

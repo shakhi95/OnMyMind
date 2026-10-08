@@ -30,7 +30,6 @@ export function AddTopicDialog({
         </label>
         <input
           id="add-topic-title"
-          autoFocus
           autoComplete="off"
           maxLength={180}
           value={title}

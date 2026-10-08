@@ -27,7 +27,6 @@ export function SearchView({
           <Search size={15} />
           <input
             data-global-search
-            autoFocus
             aria-label="Search all your thoughts"
             placeholder="Try “website” or “money”"
             value={query}

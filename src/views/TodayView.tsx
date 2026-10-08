@@ -32,7 +32,6 @@ export function TodayView({
   const ensured = useRef(false);
   const dumps = journal.dumps;
   const linkableTopics = [...topics].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  const latestDumpId = dumps[dumps.length - 1]?.id;
   const hasEmptyDump = dumps.some(isEmptyDump);
   const canWriteAgain = dumps.length > 0 && !hasEmptyDump;
 
@@ -79,7 +78,6 @@ export function TodayView({
           <DumpEditor
             key={dump.id}
             dump={dump}
-            autoFocus={dump.id === latestDumpId && !dump.content}
             topics={topics}
             linkableTopics={linkableTopics}
             onChange={(content) => onUpdateDump(dump.id, content)}

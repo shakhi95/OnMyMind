@@ -1,6 +1,23 @@
 import { useEffect, type FormEvent, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 
+let bodyScrollLocks = 0;
+let previousBodyOverflow = '';
+
+function lockBodyScroll() {
+  if (bodyScrollLocks === 0) {
+    previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+  }
+  bodyScrollLocks += 1;
+  return () => {
+    bodyScrollLocks = Math.max(0, bodyScrollLocks - 1);
+    if (bodyScrollLocks === 0) {
+      document.body.style.overflow = previousBodyOverflow;
+    }
+  };
+}
+
 /** Shared overlay + panel chrome for confirm / add / link modals. */
 export function ModalShell({
   children,
@@ -12,16 +29,20 @@ export function ModalShell({
   zIndex?: 20 | 30;
 }) {
   useEffect(() => {
+    const unlock = lockBodyScroll();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      unlock();
+    };
   }, [onClose]);
 
   return (
     <div
-      className={`fixed inset-0 grid place-items-center bg-black/55 backdrop-blur-[4px] ${
+      className={`fixed inset-0 grid place-items-center overflow-y-auto overscroll-none bg-black/55 backdrop-blur-[4px] ${
         zIndex === 30 ? 'z-30' : 'z-20'
       }`}
       onMouseDown={(event) => {

@@ -38,7 +38,6 @@ export function AddTaskDialog({
         </label>
         <input
           id="add-task-title"
-          autoFocus
           autoComplete="off"
           maxLength={180}
           value={title}

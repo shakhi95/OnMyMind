@@ -95,7 +95,6 @@ export function useGlobalShortcuts(onQuickAdd: () => void, onSearch: () => void)
       if (event.key === '/' && !isTypingTarget(event.target)) {
         event.preventDefault();
         onSearch();
-        window.setTimeout(() => document.querySelector<HTMLInputElement>('[data-global-search]')?.focus(), 0);
       }
     };
     window.addEventListener('keydown', shortcuts);

@@ -6,7 +6,6 @@ import { isEmptyDump } from '../types';
 
 export function DumpEditor({
   dump,
-  autoFocus,
   topics,
   linkableTopics,
   onChange,
@@ -18,7 +17,6 @@ export function DumpEditor({
   onOpenTopic,
 }: {
   dump: Dump;
-  autoFocus?: boolean;
   topics: Topic[];
   linkableTopics: Topic[];
   onChange: (content: string) => void;
@@ -52,7 +50,6 @@ export function DumpEditor({
           ) : null}
         </div>
         <textarea
-          autoFocus={autoFocus}
           className="min-h-[120px] w-full resize-y border-0 bg-transparent text-[15px] leading-[1.75] text-ink outline-none placeholder:text-soft"
           value={dump.content}
           onChange={(event) => onChange(event.target.value)}

@@ -110,7 +110,6 @@ function LinkTopicModal({
             </label>
             <input
               id="dump-topic-title"
-              autoFocus
               autoComplete="off"
               maxLength={180}
               value={title}
