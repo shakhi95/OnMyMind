@@ -14,7 +14,7 @@ export function TopicCard({
 }) {
   const open = tasks.filter((task) => task.status === 'open').length;
   const writingCount = topic.events.filter(
-    (event) => event.kind === 'thinking' || event.kind === 'decision',
+    (event) => event.kind === 'note' || event.kind === 'decision',
   ).length;
 
   return (

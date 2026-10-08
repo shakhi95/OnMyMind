@@ -15,7 +15,7 @@ export function eventDay(event: TopicEvent) {
 
 /** Writing that shows up in journal day digests. */
 export function isWritingEvent(event: TopicEvent) {
-  return event.kind === 'thinking' || event.kind === 'decision';
+  return event.kind === 'note' || event.kind === 'decision';
 }
 
 export function isTaskEvent(event: TopicEvent) {

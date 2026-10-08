@@ -68,7 +68,7 @@ export function exportState(data: AppState, filename: string) {
   URL.revokeObjectURL(anchor.href);
 }
 
-export function draftKey(topicId: string, kind: 'thinking' | 'decision') {
+export function draftKey(topicId: string, kind: 'note' | 'decision') {
   return `${STORAGE_KEY}.draft.${topicId}.${kind}`;
 }
 

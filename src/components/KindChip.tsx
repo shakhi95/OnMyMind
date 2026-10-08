@@ -54,7 +54,7 @@ const DEFAULT_LABEL: Record<KindTone, string> = {
 
 export function toneFromEventKind(kind: TopicEventKind): KindTone {
   switch (kind) {
-    case 'thinking':
+    case 'note':
       return 'note';
     case 'decision':
       return 'decision';

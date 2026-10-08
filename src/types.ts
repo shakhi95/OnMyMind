@@ -19,7 +19,7 @@ export type Journal = {
 /** Activity on a topic — writing, status, tasks, revisits. */
 export type TopicEventKind =
   | 'started'
-  | 'thinking'
+  | 'note'
   | 'decision'
   | 'status'
   | 'task_added'

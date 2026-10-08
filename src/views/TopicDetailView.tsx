@@ -21,12 +21,12 @@ export function TopicDetailView({
   tasks: Task[];
   setTaskStatus: (id: string, status: TaskStatus) => void;
   addTask: (title: string, topicId?: string) => void;
-  addNote: (id: string, content: string, kind?: Extract<TopicEventKind, 'thinking' | 'decision'>) => void;
+  addNote: (id: string, content: string, kind?: Extract<TopicEventKind, 'note' | 'decision'>) => void;
   setStatus: (status: TopicStatus) => void;
   onBack: () => void;
   onRevisit: () => void;
 }) {
-  const noteDraftKey = draftKey(topic.id, 'thinking');
+  const noteDraftKey = draftKey(topic.id, 'note');
   const decisionDraftKey = draftKey(topic.id, 'decision');
   const [note, setNote] = useState(() => readDraft(noteDraftKey));
   const [decision, setDecision] = useState(() => readDraft(decisionDraftKey));
@@ -203,7 +203,7 @@ export function TopicDetailView({
           <div>
             {[...topic.events].reverse().map((item) => {
               const tone = toneFromEventKind(item.kind);
-              const isWriting = item.kind === 'thinking' || item.kind === 'decision';
+              const isWriting = item.kind === 'note' || item.kind === 'decision';
               return (
                 <article
                   key={item.id}

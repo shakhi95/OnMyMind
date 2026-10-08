@@ -36,7 +36,7 @@ const evt = (
   daysAgo: number,
   hour: number,
   minute = 0,
-  kind: TopicEventKind = 'thinking',
+  kind: TopicEventKind = 'note',
   extras: Partial<TopicEvent> = {},
 ): TopicEvent =>
   makeEvent(kind, content, {

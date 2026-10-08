@@ -20,7 +20,7 @@ export function getSearchResults(data: AppState, query: string): SearchResult[] 
     topic.events.forEach((event) => {
       if (event.content.toLowerCase().includes(term)) {
         results.push({
-          kind: event.kind === 'decision' ? 'decision' : event.kind === 'thinking' ? 'note' : 'topic',
+          kind: event.kind === 'decision' ? 'decision' : event.kind === 'note' ? 'note' : 'topic',
           title: topic.title,
           excerpt: event.content,
           date: event.createdAt || event.date,

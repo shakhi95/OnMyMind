@@ -352,7 +352,7 @@ export function useAppData() {
   }, []);
 
   const addNote = useCallback(
-    (id: string, content: string, kind: Extract<TopicEventKind, 'thinking' | 'decision'> = 'thinking') => {
+    (id: string, content: string, kind: Extract<TopicEventKind, 'note' | 'decision'> = 'note') => {
       const now = new Date().toISOString();
       updateTopic(id, (topic) =>
         appendEvents(topic, makeEvent(kind, content, { createdAt: now, date: today })),
