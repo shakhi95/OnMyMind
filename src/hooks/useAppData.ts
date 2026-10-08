@@ -11,7 +11,6 @@ import {
 import { exportState, parseImportPayload, emptyState } from '../storage/storage';
 import { loadUserState, saveUserState } from '../storage/supabaseState';
 import { emptyJournal } from '../types';
-import { buildSampleState } from '../seed/sampleData';
 import type { AppState, Journal, TaskStatus, Topic, TopicEventKind, TopicStatus } from '../types';
 
 function mapDump(
@@ -421,11 +420,6 @@ export function useAppData(userId: string) {
     setToast('Backup restored to your account.');
   }, []);
 
-  const loadSampleData = useCallback(() => {
-    setData(buildSampleState());
-    setToast('Sample data loaded — explore Today, Journals, Topics, and Tasks.');
-  }, []);
-
   const journal = data.journals[today] || emptyJournal();
 
   return {
@@ -456,6 +450,5 @@ export function useAppData(userId: string) {
     setTopicStatus,
     doExport,
     doImport,
-    loadSampleData,
   };
 }

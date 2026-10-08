@@ -114,8 +114,7 @@ npm run build    # production build
 npm run preview  # preview the build
 ```
 
-**Export your data** / **Import backup** in the sidebar for JSON backups (import overwrites your cloud state).  
-**Load sample data** fills ~15 days of example dumps, topics, and tasks.  
+**Export your data** / **Import backup** for JSON backups (import overwrites your cloud state). On mobile, open the ⋯ menu in the top bar.  
 **Sign out** returns you to the login screen.
 
 ---
@@ -199,7 +198,6 @@ Export regularly if the writing matters.
 - Search across topics, dumps, notes, decisions, tasks
 - Hash routes (`#/today`, `#/journals/:day`, `#/topics/:id`, …)
 - Toast feedback; custom confirm modals (no browser `alert`/`confirm`)
-- Sample dataset for exploration
 
 ### Technical
 
@@ -248,7 +246,6 @@ supabase/schema.sql         user_data table + RLS + signup trigger
 src/hooks/                  Auth, app data, hash route, session tabs
 src/components/             Modals, chips, dump editor, shared chrome
 src/views/                  Login, Today, Journals, Topics, Tasks, Search, Topic detail
-src/seed/sampleData.ts      Optional dense sample state
 ```
 
 ---

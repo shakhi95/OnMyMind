@@ -74,7 +74,6 @@ function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: ()
     setTopicStatus,
     doExport,
     doImport,
-    loadSampleData,
   } = useAppData(userId);
 
   const { view, selectedTopic, selectedJournalDay, go, openTopicRoute, openJournalDay } = useHashRoute();
@@ -137,18 +136,6 @@ function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: ()
     });
   };
 
-  const requestLoadSample = () => {
-    setConfirm({
-      eyebrow: 'Replace your cloud data',
-      title: 'Load sample data?',
-      message:
-        'This replaces everything in your account with sample data for the last 15 days. Export first if you care about current writing.',
-      confirmLabel: 'Load sample',
-      danger: true,
-      onConfirm: () => loadSampleData(),
-    });
-  };
-
   if (loading) return <LoadingShell message="Loading your space…" />;
 
   if (loadError) {
@@ -196,7 +183,6 @@ function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: ()
         onGo={go}
         onExport={doExport}
         onImport={handleImport}
-        onLoadSample={requestLoadSample}
         onSignOut={onSignOut}
       />
 
@@ -207,6 +193,9 @@ function AuthenticatedApp({ userId, onSignOut }: { userId: string; onSignOut: ()
           saved={saved}
           saveError={saveError}
           onSearch={() => go('search')}
+          onExport={doExport}
+          onImport={handleImport}
+          onSignOut={onSignOut}
         />
 
         <div className="mx-auto max-w-[1030px] px-12 pt-12 pb-20 max-[850px]:px-7 max-[620px]:px-4 max-[620px]:pt-8">

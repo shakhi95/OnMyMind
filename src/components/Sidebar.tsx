@@ -20,7 +20,6 @@ export function Sidebar({
   onGo,
   onExport,
   onImport,
-  onLoadSample,
   onSignOut,
 }: {
   view: View;
@@ -30,7 +29,6 @@ export function Sidebar({
   onGo: (view: View) => void;
   onExport: () => void;
   onImport: (file: File) => void;
-  onLoadSample: () => void;
   onSignOut: () => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -110,13 +108,6 @@ export function Sidebar({
           className="flex cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-[11px] text-soft hover:text-ink"
         >
           <ArrowUpFromLine size={15} /> Import backup
-        </button>
-        <button
-          type="button"
-          onClick={onLoadSample}
-          className="flex cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-[11px] text-soft hover:text-ink"
-        >
-          <Sparkles size={15} /> Load sample data
         </button>
         <button
           type="button"
