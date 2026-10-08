@@ -67,7 +67,6 @@ export function SearchView({
                 <time className="text-[10px] text-soft max-[620px]:hidden">
                   {dateTimeText(
                     result.date.includes('T') ? result.date : `${result.date}T12:00:00`,
-                    { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' },
                   )}
                 </time>
                 <ArrowRight size={15} className="text-soft" />
