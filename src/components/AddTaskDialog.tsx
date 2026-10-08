@@ -2,19 +2,19 @@ import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { ModalActions, ModalHeader, ModalPanel, ModalShell } from './ModalShell';
 import { ghostBtnClass, inputClass, primaryBtnClass } from '../lib/ui';
-import type { Thread } from '../types';
+import type { Topic } from '../types';
 
 export function AddTaskDialog({
   onClose,
   onAdd,
-  threads = [],
+  topics = [],
 }: {
   onClose: () => void;
-  onAdd: (title: string, threadId?: string) => void;
-  threads?: Thread[];
+  onAdd: (title: string, topicId?: string) => void;
+  topics?: Topic[];
 }) {
   const [title, setTitle] = useState('');
-  const [threadId, setThreadId] = useState('');
+  const [topicId, setTopicId] = useState('');
 
   return (
     <ModalShell onClose={onClose}>
@@ -23,7 +23,7 @@ export function AddTaskDialog({
         onSubmit={(event) => {
           event.preventDefault();
           if (!title.trim()) return;
-          onAdd(title.trim(), threadId || undefined);
+          onAdd(title.trim(), topicId || undefined);
           onClose();
         }}
       >
@@ -47,27 +47,27 @@ export function AddTaskDialog({
           className={`mb-3 ${inputClass}`}
         />
 
-        {threads.length > 0 && (
+        {topics.length > 0 && (
           <>
-            <label htmlFor="add-task-thread" className="mb-2 block text-[11px] text-muted">
-              Link to a thread (optional)
+            <label htmlFor="add-task-topic" className="mb-2 block text-[11px] text-muted">
+              Link to a topic (optional)
             </label>
             <select
-              id="add-task-thread"
-              value={threadId}
-              onChange={(event) => setThreadId(event.target.value)}
+              id="add-task-topic"
+              value={topicId}
+              onChange={(event) => setTopicId(event.target.value)}
               className={`select-field mb-4 ${inputClass}`}
             >
-              <option value="">No thread</option>
-              {threads.map((thread) => (
-                <option key={thread.id} value={thread.id}>
-                  {thread.title}
+              <option value="">No topic</option>
+              {topics.map((topic) => (
+                <option key={topic.id} value={topic.id}>
+                  {topic.title}
                 </option>
               ))}
             </select>
           </>
         )}
-        {threads.length === 0 && <div className="mb-4" />}
+        {topics.length === 0 && <div className="mb-4" />}
 
         <ModalActions>
           <button type="button" onClick={onClose} className={ghostBtnClass}>

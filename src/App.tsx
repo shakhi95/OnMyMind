@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { AddTaskDialog } from './components/AddTaskDialog';
-import { AddThreadDialog } from './components/AddThreadDialog';
+import { AddTopicDialog } from './components/AddTopicDialog';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { Sidebar } from './components/Sidebar';
 import { Toast } from './components/Toast';
@@ -8,13 +8,13 @@ import { Topbar } from './components/Topbar';
 import { useAppData } from './hooks/useAppData';
 import { useGlobalShortcuts, useHashRoute } from './hooks/useHashRoute';
 import { getSearchResults } from './lib/search';
-import { THREADS_TAB_KEY } from './lib/ui';
+import { TOPICS_TAB_KEY } from './lib/ui';
 import type { SearchResult } from './types';
 import { JournalsView } from './views/JournalsView';
 import { SearchView } from './views/SearchView';
 import { TasksView } from './views/TasksView';
-import { ThreadDetailView } from './views/ThreadDetailView';
-import { ThreadsView } from './views/ThreadsView';
+import { TopicDetailView } from './views/TopicDetailView';
+import { TopicsView } from './views/TopicsView';
 import { TodayView } from './views/TodayView';
 
 type ConfirmState = {
@@ -35,27 +35,27 @@ export default function App() {
     toast,
     setToast,
     journal,
-    activeThreads,
+    activeTopics,
     openTasks,
     addDump,
     updateDump,
     removeDump,
-    createThreadOnDump,
-    linkThreadToDump,
-    unlinkThreadFromDump,
+    createTopicOnDump,
+    linkTopicToDump,
+    unlinkTopicFromDump,
     addTask,
-    addThread,
+    addTopic,
     setTaskStatus,
-    revisitThreadInJournal,
+    revisitTopicInJournal,
     addNote,
-    setThreadStatus,
+    setTopicStatus,
     doExport,
     doImport,
     loadSampleData,
   } = useAppData();
 
-  const { view, selectedThread, selectedJournalDay, go, openThreadRoute, openJournalDay } = useHashRoute();
-  const [dialog, setDialog] = useState<'task' | 'thread' | null>(null);
+  const { view, selectedTopic, selectedJournalDay, go, openTopicRoute, openJournalDay } = useHashRoute();
+  const [dialog, setDialog] = useState<'task' | 'topic' | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const [query, setQuery] = useState('');
 
@@ -63,22 +63,22 @@ export default function App() {
   const openSearch = useCallback(() => go('search'), [go]);
   useGlobalShortcuts(openQuickAdd, openSearch);
 
-  const openThread = (id: string, revisit = false) => {
-    if (revisit) revisitThreadInJournal(id);
-    const thread = data.threads.find((item) => item.id === id);
-    if (thread) {
+  const openTopic = (id: string, revisit = false) => {
+    if (revisit) revisitTopicInJournal(id);
+    const topic = data.topics.find((item) => item.id === id);
+    if (topic) {
       try {
-        sessionStorage.setItem(THREADS_TAB_KEY, thread.status);
+        sessionStorage.setItem(TOPICS_TAB_KEY, topic.status);
       } catch {
         /* ignore */
       }
     }
-    openThreadRoute(id);
+    openTopicRoute(id);
   };
 
   const chooseSearchResult = (result: SearchResult) => {
-    if (result.threadId) {
-      openThread(result.threadId);
+    if (result.topicId) {
+      openTopic(result.topicId);
       return;
     }
     if (result.kind === 'dump') {
@@ -107,7 +107,7 @@ export default function App() {
     setConfirm({
       eyebrow: 'This cannot be undone',
       title: 'Delete this dump?',
-      message: 'It will leave today’s journal. Linked threads stay in Threads.',
+      message: 'It will leave today’s journal. Linked topics stay in Topics.',
       confirmLabel: 'Delete dump',
       danger: true,
       onConfirm: () => removeDump(id),
@@ -126,7 +126,7 @@ export default function App() {
     });
   };
 
-  const currentThread = data.threads.find((thread) => thread.id === selectedThread);
+  const currentTopic = data.topics.find((topic) => topic.id === selectedTopic);
   const searchResults = getSearchResults(data, query);
 
   const handleImport = async (file: File) => {
@@ -141,8 +141,8 @@ export default function App() {
     <div className="flex min-h-dvh max-[620px]:block max-[620px]:pb-[63px]">
       <Sidebar
         view={view}
-        selectedThread={selectedThread}
-        activeThreadCount={activeThreads.length}
+        selectedTopic={selectedTopic}
+        activeTopicCount={activeTopics.length}
         openTaskCount={openTasks.length}
         onGo={go}
         onExport={doExport}
@@ -153,7 +153,7 @@ export default function App() {
       <main className="min-w-0 flex-1">
         <Topbar
           view={view}
-          selectedThread={selectedThread}
+          selectedTopic={selectedTopic}
           saved={saved}
           saveError={saveError}
           onSearch={() => go('search')}
@@ -170,33 +170,33 @@ export default function App() {
             </div>
           )}
 
-          {selectedThread && currentThread ? (
-            <ThreadDetailView
-              thread={currentThread}
-              tasks={data.tasks.filter((task) => task.threadId === currentThread.id)}
+          {selectedTopic && currentTopic ? (
+            <TopicDetailView
+              topic={currentTopic}
+              tasks={data.tasks.filter((task) => task.topicId === currentTopic.id)}
               setTaskStatus={setTaskStatus}
               addTask={addTask}
               addNote={addNote}
-              setStatus={(status) => setThreadStatus(currentThread.id, status)}
-              onBack={() => go(view === 'search' ? 'threads' : view)}
+              setStatus={(status) => setTopicStatus(currentTopic.id, status)}
+              onBack={() => go(view === 'search' ? 'topics' : view)}
               onRevisit={() => {
-                revisitThreadInJournal(currentThread.id);
+                revisitTopicInJournal(currentTopic.id);
                 go('today');
               }}
             />
           ) : view === 'today' ? (
             <TodayView
               journal={journal}
-              threads={data.threads}
+              topics={data.topics}
               saved={saved}
               saveError={saveError}
               onAddDump={addDump}
               onUpdateDump={updateDump}
               onRemoveDump={requestRemoveDump}
-              onCreateThread={createThreadOnDump}
-              onLinkThread={linkThreadToDump}
-              onUnlinkThread={unlinkThreadFromDump}
-              onOpenThread={openThread}
+              onCreateTopic={createTopicOnDump}
+              onLinkTopic={linkTopicToDump}
+              onUnlinkTopic={unlinkTopicFromDump}
+              onOpenTopic={openTopic}
             />
           ) : view === 'journals' ? (
             <JournalsView
@@ -204,22 +204,22 @@ export default function App() {
               selectedDay={selectedJournalDay}
               onOpenDay={openJournalDay}
               onBackToList={() => go('journals')}
-              onOpenThread={openThread}
+              onOpenTopic={openTopic}
             />
-          ) : view === 'threads' ? (
-            <ThreadsView
-              threads={data.threads}
+          ) : view === 'topics' ? (
+            <TopicsView
+              topics={data.topics}
               tasks={data.tasks}
-              onOpen={openThread}
-              onAdd={() => setDialog('thread')}
+              onOpen={openTopic}
+              onAdd={() => setDialog('topic')}
             />
           ) : view === 'tasks' ? (
             <TasksView
               tasks={data.tasks}
-              threads={data.threads}
+              topics={data.topics}
               onChange={setTaskStatus}
               onAdd={() => setDialog('task')}
-              onOpenThread={openThread}
+              onOpenTopic={openTopic}
             />
           ) : view === 'search' ? (
             <SearchView
@@ -235,16 +235,16 @@ export default function App() {
       {dialog === 'task' && (
         <AddTaskDialog
           onClose={() => setDialog(null)}
-          threads={activeThreads}
-          onAdd={(title, threadId) => addTask(title, threadId)}
+          topics={activeTopics}
+          onAdd={(title, topicId) => addTask(title, topicId)}
         />
       )}
-      {dialog === 'thread' && (
-        <AddThreadDialog
+      {dialog === 'topic' && (
+        <AddTopicDialog
           onClose={() => setDialog(null)}
           onAdd={(title) => {
-            const id = addThread(title);
-            if (id) openThread(id);
+            const id = addTopic(title);
+            if (id) openTopic(id);
           }}
         />
       )}

@@ -30,7 +30,7 @@ Guiding ideas:
 - Capture first; organize only when something stands out.
 - Thinking is valuable even when it produces no task.
 - Dropping something is not failure.
-- If a topic returns later, continue the same thread instead of duplicating it.
+- If a topic returns later, continue the same topic instead of duplicating it.
 
 ---
 
@@ -55,7 +55,7 @@ Two entry paths:
    (dump what's here)         (you already know
          │                     the action)
          ▼
-   LINK A THREAD (optional)
+   LINK A TOPIC (optional)
          │
          ▼
    THINK · DECIDE · ACT · LATER · DROP
@@ -66,19 +66,19 @@ Two entry paths:
 | Concept | What it is |
 | --- | --- |
 | **Dump** | Free writing in today’s journal. No structure required. Empty dumps are not saved. |
-| **Thread** | A lasting topic you may return to across days (active / later / resolved / dropped). |
-| **Note** | Open writing on a thread (timeline). |
+| **Topic** | Something on your mind you may return to across days (active / later / resolved / dropped). |
+| **Note** | Open writing on a topic (timeline). |
 | **Decision** | A marked outcome of thinking, kept in history. |
-| **Task** | A concrete action — standalone or attached to a thread (`open` / `done` / `dropped`). |
+| **Task** | A concrete action — standalone or attached to a topic (`open` / `done` / `dropped`). |
 | **Journal day** | A day you wrote dumps and/or had notes, decisions, or task activity. |
 
-**Thought** as a separate entity was removed. Dumps link directly to threads.
+**Thought** as a separate entity was removed. Dumps link directly to topics.
 
 ### Typical day
 
 1. Open **Today** and dump whatever is on your mind.
-2. If something stands out, **Link a thread** (new or from past — any status becomes active again).
-3. Open the thread to add notes, decisions, and actions.
+2. If something stands out, **Link a topic** (new or from past — any status becomes active again).
+3. Open the topic to add notes, decisions, and actions.
 4. Use **⌘/Ctrl+K** when you already know a task and don’t need a dump first.
 5. Browse **Journals** to see what a past day looked like.
 6. Use **Search** (`/`) to find old writing.
@@ -101,7 +101,7 @@ npm run preview  # preview the build
 
 Reset: clear this site’s local storage (export first if you care about the writing).  
 **Export your data** / **Import backup** in the sidebar for JSON backups.  
-**Load sample data** fills ~15 days of example dumps, threads, and tasks.
+**Load sample data** fills ~15 days of example dumps, topics, and tasks.
 
 ---
 
@@ -142,8 +142,8 @@ Then open the preview URL Vite prints (still uses `/OnMyMind/` asset paths).
 - Data is stored in `localStorage` under the key `on-my-mind`.
 - Not encrypted. Not synced across devices.
 - Anyone with access to the same browser profile can read it.
-- Empty dumps (no text, no linked threads) are pruned on save/export so placeholders don’t clutter history.
-- Thread note/decision drafts are stored separately until you submit them on the thread page.
+- Empty dumps (no text, no linked topics) are pruned on save/export so placeholders don’t clutter history.
+- Topic note/decision drafts are stored separately until you submit them on the topic page.
 
 Treat this like a private notebook on one device. Export regularly if the writing matters.
 
@@ -154,31 +154,31 @@ Treat this like a private notebook on one device. Export regularly if the writin
 ### Capture & journal
 
 - Today: multiple timed dumps; autosave as you type
-- Link new or past threads from a dump (pulling any status back to **active**)
+- Link new or past topics from a dump (pulling any status back to **active**)
 - Write again only when there is no empty placeholder dump
-- Delete dump via in-app confirm modal (threads are kept)
+- Delete dump via in-app confirm modal (topics are kept)
 - Empty dumps never appear in Journals and are not persisted
-- Journals: day list + day detail (dumps, linked threads, notes/decisions, short task activity including standalone tasks)
+- Journals: day list + day detail (dumps, linked topics, notes/decisions, short task activity including standalone tasks)
 
-### Threads
+### Topics
 
-- Statuses: active, later, resolved, dropped (tabs on Threads)
-- Thread page: notes, decisions, actions, timeline with muted kind chips, status controls
+- Statuses: active, later, resolved, dropped (tabs on Topics)
+- Topic page: notes, decisions, actions, timeline with muted kind chips, status controls
 - Bring into today’s journal (revisit)
 - Drafts for unsubmitted note/decision text
 
 ### Tasks
 
-- Quick add (`⌘/Ctrl+K`) — optional thread link
-- Standalone or thread-linked
+- Quick add (`⌘/Ctrl+K`) — optional topic link
+- Standalone or topic-linked
 - Tasks view tabs: open / done / dropped
-- Task events show on thread timelines and journal day digests
+- Task events show on topic timelines and journal day digests
 
 ### App shell
 
 - Dark theme, desktop sidebar + mobile bottom nav
-- Search across threads, dumps, notes, decisions, tasks
-- Hash routes (`#/today`, `#/journals/:day`, `#/threads/:id`, …)
+- Search across topics, dumps, notes, decisions, tasks
+- Hash routes (`#/today`, `#/journals/:day`, `#/topics/:id`, …)
 - Toast feedback; custom confirm modals (no browser `alert`/`confirm`)
 - Sample dataset for exploration
 
@@ -196,11 +196,11 @@ Treat this like a private notebook on one device. Export regularly if the writin
 Ordered by product value (not a commitment to build everything):
 
 1. **Accounts & sync** — secure auth + multi-device (e.g. Supabase + RLS). Local-first remains the mental model until then.
-2. **Focus helper** — on a thread: next open action + recent progress, without becoming a dashboard.
-3. **Gentle resurfacing** — optionally surface threads not touched in a while (never guilt language).
+2. **Focus helper** — on a topic: next open action + recent progress, without becoming a dashboard.
+3. **Gentle resurfacing** — optionally surface topics not touched in a while (never guilt language).
 4. **Richer export** — Markdown / readable archive alongside JSON.
 5. **Optional reminders** — only if explicitly requested by the user.
-6. **Tests** — at least smoke tests for storage prune, journal digests, and thread/task status flows.
+6. **Tests** — at least smoke tests for storage prune, journal digests, and topic/task status flows.
 
 Explicitly **out of V1 / not planned as core**: AI that silently edits your data, team sharing, kanban, streaks, analytics dashboards, OAuth, calendar integrations.
 
@@ -220,13 +220,13 @@ Explicitly **out of V1 / not planned as core**: AI that silently edits your data
 
 ```text
 src/App.tsx                 Shell: routing, confirms, view switch
-src/types.ts                Domain model (Dump, Journal, Thread, Task, …)
+src/types.ts                Domain model (Dump, Journal, Topic, Task, …)
 src/styles.css              Theme tokens + select/modal helpers
 src/lib/                    Dates, ids, search, journals digests, events, UI classes
 src/storage/storage.ts      Load / save / export / import / drafts / prune
 src/hooks/                  App data, hash route, session tabs
 src/components/             Modals, chips, dump editor, shared chrome
-src/views/                  Today, Journals, Threads, Tasks, Search, Thread detail
+src/views/                  Today, Journals, Topics, Tasks, Search, Topic detail
 src/seed/sampleData.ts      Optional dense sample state
 ```
 
@@ -252,4 +252,4 @@ The app works if you can:
 - One browser profile; no cross-device sync yet
 - Journal days use the browser’s local calendar date
 - No automated test suite yet
-- Spec file `OnMyMind.txt` described an earlier “Thought” model and full Supabase V1; this README reflects the **current** dump ↔ thread product
+- Spec file `OnMyMind.txt` described an earlier “Thought” model and full Supabase V1; this README reflects the **current** dump ↔ topic product

@@ -3,17 +3,17 @@ import { ArrowRight, Plus } from 'lucide-react';
 import { ModalActions, ModalHeader, ModalPanel, ModalShell } from './ModalShell';
 import { ago } from '../lib/dates';
 import { ghostBtnClass, inputClass, primaryBtnClass } from '../lib/ui';
-import type { Thread } from '../types';
+import type { Topic } from '../types';
 
-/** Link a new or existing thread to this dump. */
-export function DumpThreadBar({
-  pastThreads,
+/** Link a new or existing topic to this dump. */
+export function DumpTopicBar({
+  pastTopics,
   onCreateNew,
   onPickPast,
 }: {
-  pastThreads: Thread[];
+  pastTopics: Topic[];
   onCreateNew: (title: string) => void;
-  onPickPast: (threadId: string) => void;
+  onPickPast: (topicId: string) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -24,19 +24,19 @@ export function DumpThreadBar({
         onClick={() => setOpen(true)}
         className="inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-[11px] text-accent hover:text-ink"
       >
-        <Plus size={14} /> Link a thread
+        <Plus size={14} /> Link a topic
       </button>
 
       {open && (
-        <LinkThreadModal
-          pastThreads={pastThreads}
+        <LinkTopicModal
+          pastTopics={pastTopics}
           onClose={() => setOpen(false)}
           onCreateNew={(title) => {
             onCreateNew(title);
             setOpen(false);
           }}
-          onPickPast={(threadId) => {
-            onPickPast(threadId);
+          onPickPast={(topicId) => {
+            onPickPast(topicId);
             setOpen(false);
           }}
         />
@@ -45,20 +45,20 @@ export function DumpThreadBar({
   );
 }
 
-function LinkThreadModal({
-  pastThreads,
+function LinkTopicModal({
+  pastTopics,
   onClose,
   onCreateNew,
   onPickPast,
 }: {
-  pastThreads: Thread[];
+  pastTopics: Topic[];
   onClose: () => void;
   onCreateNew: (title: string) => void;
-  onPickPast: (threadId: string) => void;
+  onPickPast: (topicId: string) => void;
 }) {
   const [mode, setMode] = useState<'new' | 'past'>('new');
   const [title, setTitle] = useState('');
-  const byStatus = (status: Thread['status']) => pastThreads.filter((thread) => thread.status === status);
+  const byStatus = (status: Topic['status']) => pastTopics.filter((topic) => topic.status === status);
   const groups = [
     ['Active', byStatus('active')],
     ['Later', byStatus('later')],
@@ -71,7 +71,7 @@ function LinkThreadModal({
       <ModalPanel>
         <ModalHeader
           eyebrow="Optional — only if something stands out"
-          title="Link a thread"
+          title="Link a topic"
           onClose={onClose}
         />
 
@@ -83,7 +83,7 @@ function LinkThreadModal({
             }`}
             onClick={() => setMode('new')}
           >
-            New thread
+            New topic
           </button>
           <button
             type="button"
@@ -105,11 +105,11 @@ function LinkThreadModal({
               onCreateNew(next);
             }}
           >
-            <label htmlFor="dump-thread-title" className="mb-2 block text-[11px] text-muted">
+            <label htmlFor="dump-topic-title" className="mb-2 block text-[11px] text-muted">
               Give it a short title
             </label>
             <input
-              id="dump-thread-title"
+              id="dump-topic-title"
               autoFocus
               autoComplete="off"
               maxLength={180}
@@ -123,29 +123,29 @@ function LinkThreadModal({
                 Cancel
               </button>
               <button type="submit" className={primaryBtnClass}>
-                Add thread <ArrowRight size={14} />
+                Add topic <ArrowRight size={14} />
               </button>
             </ModalActions>
           </form>
         ) : (
           <div>
-            <p className="mb-3 text-[11px] text-muted">Pick any thread — it becomes active on this dump.</p>
+            <p className="mb-3 text-[11px] text-muted">Pick any topic — it becomes active on this dump.</p>
             <div className="mb-4 max-h-64 overflow-auto rounded-md border border-line bg-[#16171b] p-1">
-              {pastThreads.length ? (
+              {pastTopics.length ? (
                 groups.map(([label, list]) =>
                   list.length > 0 ? (
                     <div key={label}>
                       <div className="px-2 py-2 text-[10px] tracking-wide text-soft uppercase">{label}</div>
-                      {list.map((thread) => (
+                      {list.map((topic) => (
                         <button
-                          key={thread.id}
+                          key={topic.id}
                           type="button"
-                          onClick={() => onPickPast(thread.id)}
+                          onClick={() => onPickPast(topic.id)}
                           className="flex w-full cursor-pointer flex-col gap-0.5 rounded border-0 bg-transparent px-2 py-2 text-left hover:bg-panel"
                         >
-                          <span className="text-[11px] text-ink">{thread.title}</span>
+                          <span className="text-[11px] text-ink">{topic.title}</span>
                           <span className="text-[10px] text-soft">
-                            {thread.status} · last on your mind {ago(thread.updatedAt)}
+                            {topic.status} · last on your mind {ago(topic.updatedAt)}
                           </span>
                         </button>
                       ))}
@@ -153,7 +153,7 @@ function LinkThreadModal({
                   ) : null,
                 )
               ) : (
-                <p className="px-2 py-3 text-[11px] text-soft">No past threads yet. Create a new one instead.</p>
+                <p className="px-2 py-3 text-[11px] text-soft">No past topics yet. Create a new one instead.</p>
               )}
             </div>
             <ModalActions>

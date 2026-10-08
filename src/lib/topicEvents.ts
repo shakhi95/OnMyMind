@@ -1,24 +1,24 @@
 import { dayKey } from './dates';
 import { makeId } from './ids';
-import type { TaskStatus, Thread, ThreadEvent, ThreadEventKind, ThreadStatus } from '../types';
+import type { TaskStatus, Topic, TopicEvent, TopicEventKind, TopicStatus } from '../types';
 
-export const STATUS_LABELS: Record<ThreadStatus, string> = {
+export const STATUS_LABELS: Record<TopicStatus, string> = {
   active: 'Brought back to active',
   later: 'Set aside for later',
   resolved: 'Marked resolved',
   dropped: 'Let go',
 };
 
-export function eventDay(event: ThreadEvent) {
+export function eventDay(event: TopicEvent) {
   return event.date || event.createdAt.slice(0, 10);
 }
 
 /** Writing that shows up in journal day digests. */
-export function isWritingEvent(event: ThreadEvent) {
+export function isWritingEvent(event: TopicEvent) {
   return event.kind === 'thinking' || event.kind === 'decision';
 }
 
-export function isTaskEvent(event: ThreadEvent) {
+export function isTaskEvent(event: TopicEvent) {
   return (
     event.kind === 'task_added' ||
     event.kind === 'task_done' ||
@@ -28,10 +28,10 @@ export function isTaskEvent(event: ThreadEvent) {
 }
 
 export function makeEvent(
-  kind: ThreadEventKind,
+  kind: TopicEventKind,
   content: string,
-  extras: Partial<Pick<ThreadEvent, 'taskId' | 'fromStatus' | 'toStatus' | 'createdAt' | 'date' | 'id'>> = {},
-): ThreadEvent {
+  extras: Partial<Pick<TopicEvent, 'taskId' | 'fromStatus' | 'toStatus' | 'createdAt' | 'date' | 'id'>> = {},
+): TopicEvent {
   const createdAt = extras.createdAt || new Date().toISOString();
   return {
     id: extras.id || makeId(),
@@ -45,17 +45,17 @@ export function makeEvent(
   };
 }
 
-export function appendEvents(thread: Thread, ...events: ThreadEvent[]): Thread {
-  if (!events.length) return thread;
+export function appendEvents(topic: Topic, ...events: TopicEvent[]): Topic {
+  if (!events.length) return topic;
   const last = events[events.length - 1];
   return {
-    ...thread,
-    events: [...thread.events, ...events],
+    ...topic,
+    events: [...topic.events, ...events],
     updatedAt: last.createdAt,
   };
 }
 
-export function taskEventKind(status: TaskStatus): ThreadEventKind | null {
+export function taskEventKind(status: TaskStatus): TopicEventKind | null {
   if (status === 'done') return 'task_done';
   if (status === 'dropped') return 'task_dropped';
   if (status === 'open') return 'task_reopened';

@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { ModalActions, ModalHeader, ModalPanel, ModalShell } from './ModalShell';
 import { ghostBtnClass, inputClass, primaryBtnClass } from '../lib/ui';
 
-export function AddThreadDialog({
+export function AddTopicDialog({
   onClose,
   onAdd,
 }: {
@@ -23,13 +23,13 @@ export function AddThreadDialog({
           onClose();
         }}
       >
-        <ModalHeader eyebrow="Something to return to" title="Add a thread" onClose={onClose} />
+        <ModalHeader eyebrow="Something to return to" title="Add a topic" onClose={onClose} />
 
-        <label htmlFor="add-thread-title" className="mb-2 block text-[11px] text-muted">
+        <label htmlFor="add-topic-title" className="mb-2 block text-[11px] text-muted">
           Give it a short title
         </label>
         <input
-          id="add-thread-title"
+          id="add-topic-title"
           autoFocus
           autoComplete="off"
           maxLength={180}
@@ -44,7 +44,7 @@ export function AddThreadDialog({
             Cancel
           </button>
           <button type="submit" className={primaryBtnClass}>
-            Add thread <ArrowRight size={14} />
+            Add topic <ArrowRight size={14} />
           </button>
         </ModalActions>
       </ModalPanel>

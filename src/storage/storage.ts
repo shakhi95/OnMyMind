@@ -3,7 +3,7 @@ import { isEmptyDump } from '../types';
 
 export const STORAGE_KEY = 'on-my-mind';
 
-export const emptyState = (): AppState => ({ journals: {}, threads: [], tasks: [] });
+export const emptyState = (): AppState => ({ journals: {}, topics: [], tasks: [] });
 
 /** Drop placeholder dumps and journal days with nothing real left. */
 export function prunePersistedState(data: AppState): AppState {
@@ -16,7 +16,7 @@ export function prunePersistedState(data: AppState): AppState {
 
   return {
     journals,
-    threads: data.threads,
+    topics: data.topics,
     tasks: data.tasks,
   };
 }
@@ -48,7 +48,7 @@ export function isAppState(value: unknown): value is AppState {
   return (
     typeof candidate.journals === 'object' &&
     candidate.journals !== null &&
-    Array.isArray(candidate.threads) &&
+    Array.isArray(candidate.topics) &&
     Array.isArray(candidate.tasks)
   );
 }
@@ -68,8 +68,8 @@ export function exportState(data: AppState, filename: string) {
   URL.revokeObjectURL(anchor.href);
 }
 
-export function draftKey(threadId: string, kind: 'thinking' | 'decision') {
-  return `${STORAGE_KEY}.draft.${threadId}.${kind}`;
+export function draftKey(topicId: string, kind: 'thinking' | 'decision') {
+  return `${STORAGE_KEY}.draft.${topicId}.${kind}`;
 }
 
 export function readDraft(key: string) {

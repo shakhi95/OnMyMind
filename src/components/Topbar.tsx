@@ -4,13 +4,13 @@ import { VIEW_LABELS } from '../types';
 
 export function Topbar({
   view,
-  selectedThread,
+  selectedTopic,
   saved,
   saveError,
   onSearch,
 }: {
   view: View;
-  selectedThread: string | null;
+  selectedTopic: string | null;
   saved: boolean;
   saveError: boolean;
   onSearch: () => void;
@@ -21,7 +21,7 @@ export function Topbar({
         <span>My space</span>
         <b className="font-normal text-[#42434a]">/</b>
         <strong className="text-[10px] text-[#b8bac3]">
-          {selectedThread ? 'Thread' : VIEW_LABELS[view]}
+          {selectedTopic ? 'Topic' : VIEW_LABELS[view]}
         </strong>
       </div>
       <div className="flex items-center gap-3.5 max-[620px]:gap-2">

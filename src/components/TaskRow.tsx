@@ -1,17 +1,17 @@
 import { Check } from 'lucide-react';
 import { ago } from '../lib/dates';
-import type { Task, TaskStatus, Thread } from '../types';
+import type { Task, TaskStatus, Topic } from '../types';
 
 export function TaskRow({
   task,
-  thread,
+  topic,
   onChange,
-  onOpenThread,
+  onOpenTopic,
 }: {
   task: Task;
-  thread?: Thread;
+  topic?: Topic;
   onChange: (status: TaskStatus) => void;
-  onOpenThread?: (id: string) => void;
+  onOpenTopic?: (id: string) => void;
 }) {
   const statusLabel =
     task.status === 'done' ? 'Done' : task.status === 'dropped' ? 'Dropped' : null;
@@ -36,19 +36,19 @@ export function TaskRow({
         <small className="mt-1 block text-[11px] text-soft">
           Added {ago(task.createdAt)}
           {statusLabel && task.updatedAt ? ` · ${statusLabel} ${ago(task.updatedAt)}` : ''}
-          {thread && (
+          {topic && (
             <>
               {' · '}
-              {onOpenThread ? (
+              {onOpenTopic ? (
                 <button
                   type="button"
-                  onClick={() => onOpenThread(thread.id)}
+                  onClick={() => onOpenTopic(topic.id)}
                   className="cursor-pointer border-0 bg-transparent p-0 text-[11px] text-accent hover:text-ink"
                 >
-                  Thread: {thread.title}
+                  Topic: {topic.title}
                 </button>
               ) : (
-                <>Thread: {thread.title}</>
+                <>Topic: {topic.title}</>
               )}
             </>
           )}

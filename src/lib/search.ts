@@ -6,25 +6,25 @@ export function getSearchResults(data: AppState, query: string): SearchResult[] 
 
   const results: SearchResult[] = [];
 
-  data.threads.forEach((thread) => {
-    if (thread.title.toLowerCase().includes(term)) {
+  data.topics.forEach((topic) => {
+    if (topic.title.toLowerCase().includes(term)) {
       results.push({
-        kind: 'thread',
-        title: thread.title,
-        excerpt: `${thread.status} thread`,
-        date: thread.updatedAt,
-        threadId: thread.id,
-        targetId: thread.id,
+        kind: 'topic',
+        title: topic.title,
+        excerpt: `${topic.status} topic`,
+        date: topic.updatedAt,
+        topicId: topic.id,
+        targetId: topic.id,
       });
     }
-    thread.events.forEach((event) => {
+    topic.events.forEach((event) => {
       if (event.content.toLowerCase().includes(term)) {
         results.push({
-          kind: event.kind === 'decision' ? 'decision' : event.kind === 'thinking' ? 'note' : 'thread',
-          title: thread.title,
+          kind: event.kind === 'decision' ? 'decision' : event.kind === 'thinking' ? 'note' : 'topic',
+          title: topic.title,
           excerpt: event.content,
           date: event.createdAt || event.date,
-          threadId: thread.id,
+          topicId: topic.id,
           targetId: event.id,
         });
       }
@@ -33,13 +33,13 @@ export function getSearchResults(data: AppState, query: string): SearchResult[] 
 
   data.tasks.forEach((task) => {
     if (task.title.toLowerCase().includes(term)) {
-      const parent = data.threads.find((thread) => thread.id === task.threadId);
+      const parent = data.topics.find((topic) => topic.id === task.topicId);
       results.push({
         kind: 'task',
         title: task.title,
         excerpt: parent ? `Task · ${parent.title}` : `Standalone task · ${task.status}`,
         date: task.createdAt,
-        threadId: task.threadId,
+        topicId: task.topicId,
         targetId: task.id,
       });
     }

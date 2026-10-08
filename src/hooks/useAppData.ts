@@ -7,7 +7,7 @@ import {
   STATUS_LABELS,
   taskEventContent,
   taskEventKind,
-} from '../lib/threadEvents';
+} from '../lib/topicEvents';
 import {
   exportState,
   loadState,
@@ -16,7 +16,7 @@ import {
 } from '../storage/storage';
 import { emptyJournal } from '../types';
 import { buildSampleState } from '../seed/sampleData';
-import type { AppState, Journal, TaskStatus, Thread, ThreadEventKind, ThreadStatus } from '../types';
+import type { AppState, Journal, TaskStatus, Topic, TopicEventKind, TopicStatus } from '../types';
 
 function mapDump(
   journal: Journal,
@@ -28,12 +28,12 @@ function mapDump(
   };
 }
 
-function threadWithStarted(
+function topicWithStarted(
   id: string,
   title: string,
   now: string,
   extra: ReturnType<typeof makeEvent>[] = [],
-): Thread {
+): Topic {
   return {
     id,
     title,
@@ -41,7 +41,7 @@ function threadWithStarted(
     createdAt: now,
     updatedAt: now,
     events: [
-      makeEvent('started', 'Thread started', { createdAt: now, date: dayKey(new Date(now)) }),
+      makeEvent('started', 'Topic started', { createdAt: now, date: dayKey(new Date(now)) }),
       ...extra,
     ],
   };
@@ -95,7 +95,7 @@ export function useAppData() {
     changeJournal((current) => ({
       dumps: [
         ...current.dumps,
-        { id: makeId(), content: '', createdAt: now, updatedAt: now, threadIds: [] },
+        { id: makeId(), content: '', createdAt: now, updatedAt: now, topicIds: [] },
       ],
     }));
   }, [changeJournal]);
@@ -122,40 +122,40 @@ export function useAppData() {
   );
 
   const addTask = useCallback(
-    (title: string, threadId?: string) => {
+    (title: string, topicId?: string) => {
       const now = new Date().toISOString();
       const taskId = makeId();
       const trimmed = title.trim();
       setData((current) => ({
         ...current,
-        tasks: [{ id: taskId, title: trimmed, status: 'open', threadId, createdAt: now }, ...current.tasks],
-        threads: threadId
-          ? current.threads.map((thread) =>
-              thread.id === threadId
+        tasks: [{ id: taskId, title: trimmed, status: 'open', topicId, createdAt: now }, ...current.tasks],
+        topics: topicId
+          ? current.topics.map((topic) =>
+              topic.id === topicId
                 ? appendEvents(
-                    thread,
+                    topic,
                     makeEvent('task_added', trimmed, { createdAt: now, date: today, taskId }),
                   )
-                : thread,
+                : topic,
             )
-          : current.threads,
+          : current.topics,
       }));
       setToast('Saved. One less thing to remember.');
     },
     [today],
   );
 
-  const addThread = useCallback((title: string) => {
+  const addTopic = useCallback((title: string) => {
     const trimmed = title.trim();
     if (!trimmed) return;
     const now = new Date().toISOString();
-    const thread = threadWithStarted(makeId(), trimmed, now);
+    const topic = topicWithStarted(makeId(), trimmed, now);
     setData((current) => ({
       ...current,
-      threads: [thread, ...current.threads],
+      topics: [topic, ...current.topics],
     }));
-    setToast('A thread to return to, whenever you need it.');
-    return thread.id;
+    setToast('A topic to return to, whenever you need it.');
+    return topic.id;
   }, []);
 
   const setTaskStatus = useCallback(
@@ -167,43 +167,43 @@ export function useAppData() {
         return {
           ...current,
           tasks: current.tasks.map((item) => (item.id === id ? { ...item, status, updatedAt: now } : item)),
-          threads:
-            task?.threadId && kind
-              ? current.threads.map((thread) =>
-                  thread.id === task.threadId
+          topics:
+            task?.topicId && kind
+              ? current.topics.map((topic) =>
+                  topic.id === task.topicId
                     ? appendEvents(
-                        thread,
+                        topic,
                         makeEvent(kind, taskEventContent(status, task.title), {
                           createdAt: now,
                           date: today,
                           taskId: task.id,
                         }),
                       )
-                    : thread,
+                    : topic,
                 )
-              : current.threads,
+              : current.topics,
         };
       });
     },
     [today],
   );
 
-  const linkThreadToDump = useCallback(
-    (dumpId: string, threadId: string) => {
+  const linkTopicToDump = useCallback(
+    (dumpId: string, topicId: string) => {
       const now = new Date().toISOString();
       let message: string | null = null;
       setData((current) => {
-        const thread = current.threads.find((item) => item.id === threadId);
+        const topic = current.topics.find((item) => item.id === topicId);
         const page = current.journals[today] || emptyJournal();
         const dump = page.dumps.find((item) => item.id === dumpId);
-        if (!thread || !dump) return current;
-        if (dump.threadIds.includes(threadId)) {
+        if (!topic || !dump) return current;
+        if (dump.topicIds.includes(topicId)) {
           message = 'Already linked to this dump.';
           return current;
         }
 
-        const fromStatus = thread.status;
-        const nextStatus: ThreadStatus = 'active';
+        const fromStatus = topic.status;
+        const nextStatus: TopicStatus = 'active';
         const events = [
           makeEvent('revisited', 'Linked from today’s dump', { createdAt: now, date: today }),
         ];
@@ -218,7 +218,7 @@ export function useAppData() {
           );
         }
 
-        message = 'Thread linked to this dump.';
+        message = 'Topic linked to this dump.';
         return {
           ...current,
           journals: {
@@ -226,11 +226,11 @@ export function useAppData() {
             [today]: mapDump(page, dumpId, (item) => ({
               ...item,
               updatedAt: now,
-              threadIds: [...item.threadIds, threadId],
+              topicIds: [...item.topicIds, topicId],
             })),
           },
-          threads: current.threads.map((item) =>
-            item.id === threadId ? appendEvents({ ...item, status: nextStatus }, ...events) : item,
+          topics: current.topics.map((item) =>
+            item.id === topicId ? appendEvents({ ...item, status: nextStatus }, ...events) : item,
           ),
         };
       });
@@ -239,74 +239,74 @@ export function useAppData() {
     [today],
   );
 
-  const createThreadOnDump = useCallback(
+  const createTopicOnDump = useCallback(
     (dumpId: string, title: string) => {
       const trimmed = title.trim();
       if (!trimmed) return;
       const now = new Date().toISOString();
-      const thread = threadWithStarted(makeId(), trimmed, now, [
+      const topic = topicWithStarted(makeId(), trimmed, now, [
         makeEvent('linked', 'Started from today’s dump', { createdAt: now, date: today }),
       ]);
       setData((current) => {
         const page = current.journals[today] || emptyJournal();
         return {
           ...current,
-          threads: [thread, ...current.threads],
+          topics: [topic, ...current.topics],
           journals: {
             ...current.journals,
             [today]: mapDump(page, dumpId, (dump) => ({
               ...dump,
               updatedAt: now,
-              threadIds: [...dump.threadIds, thread.id],
+              topicIds: [...dump.topicIds, topic.id],
             })),
           },
         };
       });
-      setToast('A thread to return to, whenever you need it.');
-      return thread.id;
+      setToast('A topic to return to, whenever you need it.');
+      return topic.id;
     },
     [today],
   );
 
-  const unlinkThreadFromDump = useCallback(
-    (dumpId: string, threadId: string) => {
+  const unlinkTopicFromDump = useCallback(
+    (dumpId: string, topicId: string) => {
       changeJournal((current) =>
         mapDump(current, dumpId, (dump) => ({
           ...dump,
-          threadIds: dump.threadIds.filter((id) => id !== threadId),
+          topicIds: dump.topicIds.filter((id) => id !== topicId),
           updatedAt: new Date().toISOString(),
         })),
       );
-      setToast('Thread unlinked from this dump.');
+      setToast('Topic unlinked from this dump.');
     },
     [changeJournal],
   );
 
-  const revisitThreadInJournal = useCallback(
-    (threadId: string, dumpId?: string) => {
+  const revisitTopicInJournal = useCallback(
+    (topicId: string, dumpId?: string) => {
       let message: string | null = null;
       setData((current) => {
-        const thread = current.threads.find((item) => item.id === threadId);
+        const topic = current.topics.find((item) => item.id === topicId);
         const page = current.journals[today] || emptyJournal();
-        if (!thread) return current;
+        if (!topic) return current;
 
         let dumps = page.dumps;
         let targetDumpId = dumpId || dumps[dumps.length - 1]?.id;
         if (!targetDumpId) {
           const now = new Date().toISOString();
           targetDumpId = makeId();
-          dumps = [{ id: targetDumpId, content: '', createdAt: now, updatedAt: now, threadIds: [] }];
+          dumps = [{ id: targetDumpId, content: '', createdAt: now, updatedAt: now, topicIds: [] }];
         }
 
         const targetDump = dumps.find((dump) => dump.id === targetDumpId);
-        if (targetDump?.threadIds.includes(threadId)) {
+        if (targetDump?.topicIds.includes(topicId)) {
           message = 'Already linked to this dump.';
           return current;
         }
 
         const now = new Date().toISOString();
-        const fromStatus = thread.status;
-        const nextStatus: ThreadStatus = 'active';
+        const fromStatus = topic.status;
+        const nextStatus: TopicStatus = 'active';
         const events = [
           makeEvent('revisited', 'Brought into today’s journal', { createdAt: now, date: today }),
         ];
@@ -329,13 +329,13 @@ export function useAppData() {
             [today]: {
               dumps: dumps.map((dump) =>
                 dump.id === targetDumpId
-                  ? { ...dump, updatedAt: now, threadIds: [...dump.threadIds, threadId] }
+                  ? { ...dump, updatedAt: now, topicIds: [...dump.topicIds, topicId] }
                   : dump,
               ),
             },
           },
-          threads: current.threads.map((item) =>
-            item.id === threadId ? appendEvents({ ...item, status: nextStatus }, ...events) : item,
+          topics: current.topics.map((item) =>
+            item.id === topicId ? appendEvents({ ...item, status: nextStatus }, ...events) : item,
           ),
         };
       });
@@ -344,40 +344,40 @@ export function useAppData() {
     [today],
   );
 
-  const updateThread = useCallback((id: string, change: (thread: Thread) => Thread) => {
+  const updateTopic = useCallback((id: string, change: (topic: Topic) => Topic) => {
     setData((current) => ({
       ...current,
-      threads: current.threads.map((thread) => (thread.id === id ? change(thread) : thread)),
+      topics: current.topics.map((topic) => (topic.id === id ? change(topic) : topic)),
     }));
   }, []);
 
   const addNote = useCallback(
-    (id: string, content: string, kind: Extract<ThreadEventKind, 'thinking' | 'decision'> = 'thinking') => {
+    (id: string, content: string, kind: Extract<TopicEventKind, 'thinking' | 'decision'> = 'thinking') => {
       const now = new Date().toISOString();
-      updateThread(id, (thread) =>
-        appendEvents(thread, makeEvent(kind, content, { createdAt: now, date: today })),
+      updateTopic(id, (topic) =>
+        appendEvents(topic, makeEvent(kind, content, { createdAt: now, date: today })),
       );
     },
-    [today, updateThread],
+    [today, updateTopic],
   );
 
-  const setThreadStatus = useCallback(
-    (id: string, status: ThreadStatus) => {
+  const setTopicStatus = useCallback(
+    (id: string, status: TopicStatus) => {
       const now = new Date().toISOString();
-      updateThread(id, (thread) => {
-        if (thread.status === status) return thread;
+      updateTopic(id, (topic) => {
+        if (topic.status === status) return topic;
         return appendEvents(
-          { ...thread, status },
+          { ...topic, status },
           makeEvent('status', STATUS_LABELS[status], {
             createdAt: now,
             date: today,
-            fromStatus: thread.status,
+            fromStatus: topic.status,
             toStatus: status,
           }),
         );
       });
     },
-    [today, updateThread],
+    [today, updateTopic],
   );
 
   const doExport = useCallback(() => {
@@ -393,7 +393,7 @@ export function useAppData() {
 
   const loadSampleData = useCallback(() => {
     setData(buildSampleState());
-    setToast('Sample data loaded — explore Today, Journals, Threads, and Tasks.');
+    setToast('Sample data loaded — explore Today, Journals, Topics, and Tasks.');
   }, []);
 
   const journal = data.journals[today] || emptyJournal();
@@ -406,22 +406,22 @@ export function useAppData() {
     toast,
     setToast,
     journal,
-    activeThreads: data.threads
-      .filter((thread) => thread.status === 'active')
+    activeTopics: data.topics
+      .filter((topic) => topic.status === 'active')
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
     openTasks: data.tasks.filter((task) => task.status === 'open'),
     addDump,
     updateDump,
     removeDump,
     addTask,
-    addThread,
+    addTopic,
     setTaskStatus,
-    linkThreadToDump,
-    createThreadOnDump,
-    unlinkThreadFromDump,
-    revisitThreadInJournal,
+    linkTopicToDump,
+    createTopicOnDump,
+    unlinkTopicFromDump,
+    revisitTopicInJournal,
     addNote,
-    setThreadStatus,
+    setTopicStatus,
     doExport,
     doImport,
     loadSampleData,

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { isTypingTarget } from '../lib/dom';
-import { THREADS_TAB_KEY } from '../lib/ui';
+import { TOPICS_TAB_KEY } from '../lib/ui';
 import type { View } from '../types';
 import { VIEWS } from '../types';
 
 export function useHashRoute() {
   const [view, setView] = useState<View>('today');
-  const [selectedThread, setSelectedThread] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [selectedJournalDay, setSelectedJournalDay] = useState<string | null>(null);
 
   const syncRoute = useCallback(() => {
@@ -17,26 +17,26 @@ export function useHashRoute() {
     }
     if (route[0] === 'later') {
       try {
-        sessionStorage.setItem(THREADS_TAB_KEY, 'later');
+        sessionStorage.setItem(TOPICS_TAB_KEY, 'later');
       } catch {
         /* ignore */
       }
-      window.location.hash = '#/threads';
+      window.location.hash = '#/topics';
       return;
     }
-    if (route[0] === 'threads' && route[1]) {
-      setSelectedThread(route[1]);
+    if (route[0] === 'topics' && route[1]) {
+      setSelectedTopic(route[1]);
       setSelectedJournalDay(null);
-      setView('threads');
+      setView('topics');
       return;
     }
     if (route[0] === 'journals') {
-      setSelectedThread(null);
+      setSelectedTopic(null);
       setSelectedJournalDay(route[1] || null);
       setView('journals');
       return;
     }
-    setSelectedThread(null);
+    setSelectedTopic(null);
     setSelectedJournalDay(null);
     const requested = route[0] as View;
     setView(VIEWS.includes(requested) ? requested : 'today');
@@ -50,21 +50,21 @@ export function useHashRoute() {
   }, [syncRoute]);
 
   const go = useCallback((next: View) => {
-    setSelectedThread(null);
+    setSelectedTopic(null);
     setSelectedJournalDay(null);
     setView(next);
     window.location.hash = `#/${next}`;
   }, []);
 
-  const openThreadRoute = useCallback((id: string) => {
-    setSelectedThread(id);
+  const openTopicRoute = useCallback((id: string) => {
+    setSelectedTopic(id);
     setSelectedJournalDay(null);
-    setView('threads');
-    window.location.hash = `#/threads/${id}`;
+    setView('topics');
+    window.location.hash = `#/topics/${id}`;
   }, []);
 
   const openJournalDay = useCallback((day: string) => {
-    setSelectedThread(null);
+    setSelectedTopic(null);
     setSelectedJournalDay(day);
     setView('journals');
     window.location.hash = `#/journals/${day}`;
@@ -72,12 +72,12 @@ export function useHashRoute() {
 
   return {
     view,
-    selectedThread,
+    selectedTopic,
     selectedJournalDay,
     go,
-    openThreadRoute,
+    openTopicRoute,
     openJournalDay,
-    setSelectedThread,
+    setSelectedTopic,
   };
 }
 

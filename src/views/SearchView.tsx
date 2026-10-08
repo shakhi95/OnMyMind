@@ -21,7 +21,7 @@ export function SearchView({
       <PageHeader
         eyebrow="Find your way back"
         title="Search your space"
-        description="Look across threads, tasks, dumps, and decisions."
+        description="Look across topics, tasks, dumps, and decisions."
       >
         <div className="flex min-w-[min(300px,40vw)] items-center gap-2 rounded-md border border-line bg-[#141518] px-3 py-2 text-soft max-[620px]:min-w-full max-[620px]:w-full">
           <Search size={15} />
@@ -78,14 +78,14 @@ export function SearchView({
           <EmptyState
             icon={<Search />}
             title="No matches yet."
-            text="Try a different word. Your search covers dumps, thread notes, decisions, and tasks."
+            text="Try a different word. Your search covers dumps, topic notes, decisions, and tasks."
           />
         )
       ) : (
         <EmptyState
           icon={<Search />}
           title="Everything you wrote, findable."
-          text="Search titles, notes, decisions, and actions whenever you need to pick up an old thread."
+          text="Search titles, notes, decisions, and actions whenever you need to pick up an old topic."
         />
       )}
     </>

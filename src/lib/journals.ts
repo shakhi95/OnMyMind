@@ -1,10 +1,10 @@
-import type { AppState, Dump, Task, Thread, ThreadEvent } from '../types';
-import { emptyJournal, isEmptyDump, journalThreadIds } from '../types';
-import { eventDay, isTaskEvent, isWritingEvent } from './threadEvents';
+import type { AppState, Dump, Task, Topic, TopicEvent } from '../types';
+import { emptyJournal, isEmptyDump, journalTopicIds } from '../types';
+import { eventDay, isTaskEvent, isWritingEvent } from './topicEvents';
 
-export type DayThreadActivity = {
-  thread: Thread;
-  event: Thread['events'][number];
+export type DayTopicActivity = {
+  topic: Topic;
+  event: Topic['events'][number];
 };
 
 export type DayTaskActivity = {
@@ -12,23 +12,23 @@ export type DayTaskActivity = {
   label: string;
   title: string;
   at: string;
-  threadId?: string;
-  threadTitle?: string;
+  topicId?: string;
+  topicTitle?: string;
 };
 
 export type JournalDaySummary = {
   date: string;
   dumpCount: number;
-  threadLinkCount: number;
-  threadActivityCount: number;
+  topicLinkCount: number;
+  topicActivityCount: number;
   taskActivityCount: number;
 };
 
 export type JournalDayDetail = {
   date: string;
   dumps: Dump[];
-  linkedThreadIds: string[];
-  threadActivity: DayThreadActivity[];
+  linkedTopicIds: string[];
+  topicActivity: DayTopicActivity[];
   taskActivity: DayTaskActivity[];
 };
 
@@ -36,7 +36,7 @@ function dayOf(iso: string) {
   return iso.slice(0, 10);
 }
 
-function taskLabel(kind: ThreadEvent['kind']): string {
+function taskLabel(kind: TopicEvent['kind']): string {
   if (kind === 'task_done') return 'Done';
   if (kind === 'task_dropped') return 'Dropped';
   if (kind === 'task_reopened') return 'Reopened';
@@ -88,29 +88,29 @@ function standaloneTaskLines(task: Task, date: string): DayTaskActivity[] {
 function collectTaskActivity(data: AppState, date: string): DayTaskActivity[] {
   const items: DayTaskActivity[] = [];
 
-  data.threads.forEach((thread) => {
-    thread.events.forEach((event) => {
+  data.topics.forEach((topic) => {
+    topic.events.forEach((event) => {
       if (eventDay(event) !== date || !isTaskEvent(event)) return;
       items.push({
         id: event.id,
         label: taskLabel(event.kind),
         title: event.content.replace(/^(Done|Dropped|Reopened) · /, ''),
         at: event.createdAt || event.date,
-        threadId: thread.id,
-        threadTitle: thread.title,
+        topicId: topic.id,
+        topicTitle: topic.title,
       });
     });
   });
 
   data.tasks.forEach((task) => {
-    if (task.threadId) return;
+    if (task.topicId) return;
     items.push(...standaloneTaskLines(task, date));
   });
 
   return items.sort((a, b) => b.at.localeCompare(a.at));
 }
 
-/** Days that have a journal dump, thread writing, and/or task activity. Newest first. */
+/** Days that have a journal dump, topic writing, and/or task activity. Newest first. */
 export function listJournalDays(data: AppState): JournalDaySummary[] {
   const dates = new Set<string>();
 
@@ -118,14 +118,14 @@ export function listJournalDays(data: AppState): JournalDaySummary[] {
     if ((journal.dumps || []).some((dump) => !isEmptyDump(dump))) dates.add(date);
   });
 
-  data.threads.forEach((thread) => {
-    thread.events.forEach((event) => {
+  data.topics.forEach((topic) => {
+    topic.events.forEach((event) => {
       if (isWritingEvent(event) || isTaskEvent(event)) dates.add(eventDay(event));
     });
   });
 
   data.tasks.forEach((task) => {
-    if (task.threadId) return;
+    if (task.topicId) return;
     dates.add(dayOf(task.createdAt));
     if (task.updatedAt) dates.add(dayOf(task.updatedAt));
   });
@@ -135,48 +135,48 @@ export function listJournalDays(data: AppState): JournalDaySummary[] {
     .map((date) => {
       const journal = data.journals[date] || emptyJournal();
       const dumps = (journal.dumps || []).filter((dump) => !isEmptyDump(dump));
-      const threadActivityCount = data.threads.reduce(
-        (count, thread) =>
-          count + thread.events.filter((event) => eventDay(event) === date && isWritingEvent(event)).length,
+      const topicActivityCount = data.topics.reduce(
+        (count, topic) =>
+          count + topic.events.filter((event) => eventDay(event) === date && isWritingEvent(event)).length,
         0,
       );
       const taskActivity = collectTaskActivity(data, date);
       return {
         date,
         dumpCount: dumps.length,
-        threadLinkCount: journalThreadIds({ dumps }).length,
-        threadActivityCount,
+        topicLinkCount: journalTopicIds({ dumps }).length,
+        topicActivityCount,
         taskActivityCount: taskActivity.length,
       };
     })
     .filter(
       (day) =>
-        day.dumpCount > 0 || day.threadActivityCount > 0 || day.taskActivityCount > 0,
+        day.dumpCount > 0 || day.topicActivityCount > 0 || day.taskActivityCount > 0,
     );
 }
 
 export function getJournalDayDetail(data: AppState, date: string): JournalDayDetail {
   const journal = data.journals[date] || emptyJournal();
   const dumps = (journal.dumps || []).filter((dump) => !isEmptyDump(dump));
-  const threadActivity: DayThreadActivity[] = [];
+  const topicActivity: DayTopicActivity[] = [];
 
-  data.threads.forEach((thread) => {
-    thread.events.forEach((event) => {
+  data.topics.forEach((topic) => {
+    topic.events.forEach((event) => {
       if (eventDay(event) === date && isWritingEvent(event)) {
-        threadActivity.push({ thread, event });
+        topicActivity.push({ topic, event });
       }
     });
   });
 
-  threadActivity.sort((a, b) =>
+  topicActivity.sort((a, b) =>
     (b.event.createdAt || b.event.date).localeCompare(a.event.createdAt || a.event.date),
   );
 
   return {
     date,
     dumps: [...dumps].reverse(),
-    linkedThreadIds: journalThreadIds({ dumps }),
-    threadActivity,
+    linkedTopicIds: journalTopicIds({ dumps }),
+    topicActivity,
     taskActivity: collectTaskActivity(data, date),
   };
 }

@@ -4,7 +4,7 @@ import { PageHeader } from '../components/PageHeader';
 import { TaskRow } from '../components/TaskRow';
 import { useSessionTab } from '../hooks/useSessionTab';
 import { TASKS_TAB_KEY, primaryBtnClass } from '../lib/ui';
-import type { Task, TaskStatus, Thread } from '../types';
+import type { Task, TaskStatus, Topic } from '../types';
 
 const TABS: { id: TaskStatus; label: string; emptyTitle: string; emptyText: string }[] = [
   {
@@ -31,16 +31,16 @@ const TAB_IDS = TABS.map((tab) => tab.id);
 
 export function TasksView({
   tasks,
-  threads,
+  topics,
   onChange,
   onAdd,
-  onOpenThread,
+  onOpenTopic,
 }: {
   tasks: Task[];
-  threads: Thread[];
+  topics: Topic[];
   onChange: (id: string, status: TaskStatus) => void;
   onAdd: () => void;
-  onOpenThread: (id: string) => void;
+  onOpenTopic: (id: string) => void;
 }) {
   const [tab, setTab] = useSessionTab(TASKS_TAB_KEY, TAB_IDS, 'open');
   const current = TABS.find((item) => item.id === tab) || TABS[0];
@@ -89,9 +89,9 @@ export function TasksView({
             <TaskRow
               key={task.id}
               task={task}
-              thread={threads.find((thread) => thread.id === task.threadId)}
+              topic={topics.find((topic) => topic.id === task.topicId)}
               onChange={(status) => onChange(task.id, status)}
-              onOpenThread={onOpenThread}
+              onOpenTopic={onOpenTopic}
             />
           ))}
         </div>

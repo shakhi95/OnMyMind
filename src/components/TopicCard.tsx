@@ -1,19 +1,19 @@
 import { ArrowRight, Circle } from 'lucide-react';
 import { ago } from '../lib/dates';
-import { THREAD_STATUS_CHIP } from '../lib/ui';
-import type { Task, Thread } from '../types';
+import { TOPIC_STATUS_CHIP } from '../lib/ui';
+import type { Task, Topic } from '../types';
 
-export function ThreadCard({
-  thread,
+export function TopicCard({
+  topic,
   tasks,
   onClick,
 }: {
-  thread: Thread;
+  topic: Topic;
   tasks: Task[];
   onClick: () => void;
 }) {
   const open = tasks.filter((task) => task.status === 'open').length;
-  const writingCount = thread.events.filter(
+  const writingCount = topic.events.filter(
     (event) => event.kind === 'thinking' || event.kind === 'decision',
   ).length;
 
@@ -27,17 +27,17 @@ export function ThreadCard({
         <Circle size={17} />
       </span>
       <span className="min-w-0 flex-1">
-        <strong className="block text-sm font-semibold text-ink">{thread.title}</strong>
+        <strong className="block text-sm font-semibold text-ink">{topic.title}</strong>
         <small className="mt-1.5 block text-[11px] text-soft">
-          {writingCount} {writingCount === 1 ? 'note' : 'notes'} · {thread.events.length} updates · last
-          on your mind {ago(thread.updatedAt)}
+          {writingCount} {writingCount === 1 ? 'note' : 'notes'} · {topic.events.length} updates · last
+          on your mind {ago(topic.updatedAt)}
           {open ? ` · ${open} open ${open === 1 ? 'task' : 'tasks'}` : ''}
         </small>
       </span>
       <span
-        className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${THREAD_STATUS_CHIP[thread.status]}`}
+        className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${TOPIC_STATUS_CHIP[topic.status]}`}
       >
-        {thread.status}
+        {topic.status}
       </span>
       <ArrowRight size={16} className="text-soft" />
     </button>

@@ -11,13 +11,13 @@ export function JournalsView({
   selectedDay,
   onOpenDay,
   onBackToList,
-  onOpenThread,
+  onOpenTopic,
 }: {
   data: AppState;
   selectedDay: string | null;
   onOpenDay: (day: string) => void;
   onBackToList: () => void;
-  onOpenThread: (id: string) => void;
+  onOpenTopic: (id: string) => void;
 }) {
   if (selectedDay) {
     return (
@@ -25,7 +25,7 @@ export function JournalsView({
         data={data}
         date={selectedDay}
         onBack={onBackToList}
-        onOpenThread={onOpenThread}
+        onOpenTopic={onOpenTopic}
       />
     );
   }
@@ -37,7 +37,7 @@ export function JournalsView({
       <PageHeader
         eyebrow="Your days, kept"
         title="Journals"
-        description="Open a day to see dumps, linked threads, writing, and tasks from then."
+        description="Open a day to see dumps, linked topics, writing, and tasks from then."
       />
       {!days.length ? (
         <EmptyState
@@ -63,11 +63,11 @@ export function JournalsView({
                 </strong>
                 <small className="mt-1 block text-[11px] text-soft">
                   {day.dumpCount} {day.dumpCount === 1 ? 'dump' : 'dumps'}
-                  {day.threadLinkCount
-                    ? ` · ${day.threadLinkCount} linked ${day.threadLinkCount === 1 ? 'thread' : 'threads'}`
+                  {day.topicLinkCount
+                    ? ` · ${day.topicLinkCount} linked ${day.topicLinkCount === 1 ? 'topic' : 'topics'}`
                     : ''}
-                  {day.threadActivityCount
-                    ? ` · ${day.threadActivityCount} thread ${day.threadActivityCount === 1 ? 'note' : 'notes'}`
+                  {day.topicActivityCount
+                    ? ` · ${day.topicActivityCount} topic ${day.topicActivityCount === 1 ? 'note' : 'notes'}`
                     : ''}
                   {day.taskActivityCount
                     ? ` · ${day.taskActivityCount} task ${day.taskActivityCount === 1 ? 'update' : 'updates'}`
@@ -87,18 +87,18 @@ function JournalDayView({
   data,
   date,
   onBack,
-  onOpenThread,
+  onOpenTopic,
 }: {
   data: AppState;
   date: string;
   onBack: () => void;
-  onOpenThread: (id: string) => void;
+  onOpenTopic: (id: string) => void;
 }) {
   const detail = getJournalDayDetail(data, date);
   const hasDumps = detail.dumps.length > 0;
-  const hasActivity = detail.threadActivity.length > 0;
+  const hasActivity = detail.topicActivity.length > 0;
   const hasTasks = detail.taskActivity.length > 0;
-  const threadById = new Map(data.threads.map((thread) => [thread.id, thread]));
+  const topicById = new Map(data.topics.map((topic) => [topic.id, topic]));
 
   return (
     <div>
@@ -118,18 +118,18 @@ function JournalDayView({
 
       <section className="mb-8">
         <div className="mb-3 flex items-center gap-2 text-[10px] font-bold tracking-[1.5px] text-soft uppercase">
-          <Feather size={13} /> Dumps & threads
+          <Feather size={13} /> Dumps & topics
         </div>
         {!hasDumps ? (
           <p className="rounded-[10px] border border-line bg-surface px-4 py-3 text-xs text-soft">
-            No dumps this day. Thread writing below may still have happened.
+            No dumps this day. Topic writing below may still have happened.
           </p>
         ) : (
           <div className="grid gap-3">
             {detail.dumps.map((dump) => {
-              const linked = dump.threadIds
-                .map((id) => threadById.get(id))
-                .filter((thread): thread is NonNullable<typeof thread> => Boolean(thread));
+              const linked = dump.topicIds
+                .map((id) => topicById.get(id))
+                .filter((topic): topic is NonNullable<typeof topic> => Boolean(topic));
               return (
                 <article key={dump.id} className="rounded-[10px] border border-line bg-surface px-4 py-4">
                   <time className="text-[10px] tracking-wide text-soft">{dateTimeText(dump.createdAt)}</time>
@@ -138,15 +138,15 @@ function JournalDayView({
                   ) : null}
                   {linked.length > 0 && (
                     <ol className="mt-3 list-none border-t border-line pt-2">
-                      {linked.map((thread, index) => (
-                        <li key={thread.id} className="flex items-center gap-2 py-1.5 text-[13px] text-ink">
+                      {linked.map((topic, index) => (
+                        <li key={topic.id} className="flex items-center gap-2 py-1.5 text-[13px] text-ink">
                           <span className="w-5 shrink-0 font-display text-[11px] text-soft">
                             {String(index + 1).padStart(2, '0')}
                           </span>
-                          <span className="min-w-0 flex-1 font-medium">{thread.title || 'Untitled'}</span>
+                          <span className="min-w-0 flex-1 font-medium">{topic.title || 'Untitled'}</span>
                           <button
                             type="button"
-                            onClick={() => onOpenThread(thread.id)}
+                            onClick={() => onOpenTopic(topic.id)}
                             className="inline-flex shrink-0 cursor-pointer items-center gap-0.5 border-0 bg-transparent p-0 text-[10px] text-accent hover:text-ink"
                           >
                             Open <ArrowRight size={12} />
@@ -164,15 +164,15 @@ function JournalDayView({
 
       <section className="mb-8">
         <div className="mb-3 text-[10px] font-bold tracking-[1.5px] text-soft uppercase">
-          On threads that day
+          On topics that day
         </div>
         {!hasActivity ? (
           <p className="rounded-[10px] border border-line bg-surface px-4 py-3 text-xs text-soft">
-            No thread writing this day.
+            No topic writing this day.
           </p>
         ) : (
           <div className="grid gap-2">
-            {detail.threadActivity.map(({ thread, event }) => (
+            {detail.topicActivity.map(({ topic, event }) => (
               <article
                 key={event.id}
                 className="rounded-lg border border-line bg-surface px-4 py-3.5"
@@ -180,15 +180,15 @@ function JournalDayView({
                 <small className="flex flex-wrap items-center gap-2 text-[10px] tracking-[0.8px] text-soft uppercase">
                   <time>{dateTimeText(event.createdAt || `${event.date}T12:00:00`)}</time>
                   <KindChip tone={toneFromEventKind(event.kind)} />
-                  <span>{thread.title}</span>
+                  <span>{topic.title}</span>
                 </small>
                 <p className="mt-2 mb-2 whitespace-pre-wrap text-[13px] leading-relaxed text-ink">{event.content}</p>
                 <button
                   type="button"
-                  onClick={() => onOpenThread(thread.id)}
+                  onClick={() => onOpenTopic(topic.id)}
                   className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-[11px] text-accent hover:text-ink"
                 >
-                  Open thread <ArrowRight size={12} />
+                  Open topic <ArrowRight size={12} />
                 </button>
               </article>
             ))}
@@ -211,13 +211,13 @@ function JournalDayView({
               >
                 <KindChip tone={toneFromTaskLabel(item.label)}>{item.label}</KindChip>
                 <span className="min-w-0 flex-1 text-[13px] text-ink">{item.title}</span>
-                {item.threadId ? (
+                {item.topicId ? (
                   <button
                     type="button"
-                    onClick={() => onOpenThread(item.threadId!)}
+                    onClick={() => onOpenTopic(item.topicId!)}
                     className="inline-flex shrink-0 cursor-pointer items-center gap-0.5 border-0 bg-transparent p-0 text-[10px] text-accent hover:text-ink"
                   >
-                    {item.threadTitle || 'Thread'} <ArrowRight size={12} />
+                    {item.topicTitle || 'Topic'} <ArrowRight size={12} />
                   </button>
                 ) : (
                   <span className="shrink-0 text-[10px] text-soft">Standalone</span>

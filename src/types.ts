@@ -1,6 +1,6 @@
-export type View = 'today' | 'journals' | 'threads' | 'tasks' | 'search';
+export type View = 'today' | 'journals' | 'topics' | 'tasks' | 'search';
 
-export type ThreadStatus = 'active' | 'later' | 'resolved' | 'dropped';
+export type TopicStatus = 'active' | 'later' | 'resolved' | 'dropped';
 export type TaskStatus = 'open' | 'done' | 'dropped';
 
 export type Dump = {
@@ -8,16 +8,16 @@ export type Dump = {
   content: string;
   createdAt: string;
   updatedAt: string;
-  /** Threads touched in this dump. */
-  threadIds: string[];
+  /** Topics touched in this dump. */
+  topicIds: string[];
 };
 
 export type Journal = {
   dumps: Dump[];
 };
 
-/** Activity on a thread — writing, status, tasks, revisits. */
-export type ThreadEventKind =
+/** Activity on a topic — writing, status, tasks, revisits. */
+export type TopicEventKind =
   | 'started'
   | 'thinking'
   | 'decision'
@@ -29,65 +29,65 @@ export type ThreadEventKind =
   | 'revisited'
   | 'linked';
 
-export type ThreadEvent = {
+export type TopicEvent = {
   id: string;
-  kind: ThreadEventKind;
+  kind: TopicEventKind;
   content: string;
   createdAt: string;
   date: string;
   taskId?: string;
-  fromStatus?: ThreadStatus;
-  toStatus?: ThreadStatus;
+  fromStatus?: TopicStatus;
+  toStatus?: TopicStatus;
 };
 
-export type Thread = {
+export type Topic = {
   id: string;
   title: string;
-  status: ThreadStatus;
+  status: TopicStatus;
   createdAt: string;
   updatedAt: string;
-  events: ThreadEvent[];
+  events: TopicEvent[];
 };
 
 export type Task = {
   id: string;
   title: string;
   status: TaskStatus;
-  threadId?: string;
+  topicId?: string;
   createdAt: string;
   updatedAt?: string;
 };
 
 export type AppState = {
   journals: Record<string, Journal>;
-  threads: Thread[];
+  topics: Topic[];
   tasks: Task[];
 };
 
 export type SearchResult = {
-  kind: 'thread' | 'task' | 'decision' | 'note' | 'dump';
+  kind: 'topic' | 'task' | 'decision' | 'note' | 'dump';
   title: string;
   excerpt: string;
   date: string;
-  threadId?: string;
+  topicId?: string;
   targetId?: string;
 };
 
-export const VIEWS: View[] = ['today', 'journals', 'threads', 'tasks', 'search'];
+export const VIEWS: View[] = ['today', 'journals', 'topics', 'tasks', 'search'];
 
 export const VIEW_LABELS: Record<View, string> = {
   today: 'Today',
   journals: 'Journals',
-  threads: 'Threads',
+  topics: 'Topics',
   tasks: 'Tasks',
   search: 'Search',
 };
 
 export const emptyJournal = (): Journal => ({ dumps: [] });
 
-/** Placeholder dump: no writing and no linked threads. */
+/** Placeholder dump: no writing and no linked topics. */
 export const isEmptyDump = (dump: Dump): boolean =>
-  !dump.content.trim() && dump.threadIds.length === 0;
+  !dump.content.trim() && dump.topicIds.length === 0;
 
-export const journalThreadIds = (journal: Journal): string[] =>
-  [...new Set(journal.dumps.flatMap((dump) => dump.threadIds))];
+export const journalTopicIds = (journal: Journal): string[] =>
+  [...new Set(journal.dumps.flatMap((dump) => dump.topicIds))];

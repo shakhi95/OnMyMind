@@ -13,8 +13,8 @@ import type { View } from '../types';
 
 export function Sidebar({
   view,
-  selectedThread,
-  activeThreadCount,
+  selectedTopic,
+  activeTopicCount,
   openTaskCount,
   onGo,
   onExport,
@@ -22,8 +22,8 @@ export function Sidebar({
   onLoadSample,
 }: {
   view: View;
-  selectedThread: string | null;
-  activeThreadCount: number;
+  selectedTopic: string | null;
+  activeTopicCount: number;
   openTaskCount: number;
   onGo: (view: View) => void;
   onExport: () => void;
@@ -61,27 +61,27 @@ export function Sidebar({
         <NavButton
           icon={<Clock3 size={16} strokeWidth={1.65} />}
           label="Today"
-          active={view === 'today' && !selectedThread}
+          active={view === 'today' && !selectedTopic}
           onClick={() => onGo('today')}
         />
         <NavButton
           icon={<BookOpen size={16} strokeWidth={1.65} />}
           label="Journals"
-          active={view === 'journals' && !selectedThread}
+          active={view === 'journals' && !selectedTopic}
           onClick={() => onGo('journals')}
         />
         <NavButton
           icon={<Circle size={16} strokeWidth={1.65} />}
-          label="Threads"
-          count={activeThreadCount}
-          active={view === 'threads' && !selectedThread}
-          onClick={() => onGo('threads')}
+          label="Topics"
+          count={activeTopicCount}
+          active={view === 'topics' && !selectedTopic}
+          onClick={() => onGo('topics')}
         />
         <NavButton
           icon={<ListChecks size={16} strokeWidth={1.65} />}
           label="Tasks"
           count={openTaskCount}
-          active={view === 'tasks' && !selectedThread}
+          active={view === 'tasks' && !selectedTopic}
           onClick={() => onGo('tasks')}
         />
       </nav>

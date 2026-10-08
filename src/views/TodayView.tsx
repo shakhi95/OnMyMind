@@ -1,39 +1,39 @@
 import { useEffect, useRef } from 'react';
 import { Feather, Plus, Sparkles } from 'lucide-react';
 import { DumpEditor } from '../components/DumpEditor';
-import type { Journal, Thread } from '../types';
+import type { Journal, Topic } from '../types';
 import { isEmptyDump } from '../types';
 
 export function TodayView({
   journal,
-  threads,
+  topics,
   saved,
   saveError,
   onAddDump,
   onUpdateDump,
   onRemoveDump,
-  onCreateThread,
-  onLinkThread,
-  onUnlinkThread,
-  onOpenThread,
+  onCreateTopic,
+  onLinkTopic,
+  onUnlinkTopic,
+  onOpenTopic,
 }: {
   journal: Journal;
-  threads: Thread[];
+  topics: Topic[];
   saved: boolean;
   saveError: boolean;
   onAddDump: () => void;
   onUpdateDump: (id: string, content: string) => void;
   onRemoveDump: (id: string) => void;
-  onCreateThread: (dumpId: string, title: string) => void;
-  onLinkThread: (dumpId: string, threadId: string) => void;
-  onUnlinkThread: (dumpId: string, threadId: string) => void;
-  onOpenThread: (id: string) => void;
+  onCreateTopic: (dumpId: string, title: string) => void;
+  onLinkTopic: (dumpId: string, topicId: string) => void;
+  onUnlinkTopic: (dumpId: string, topicId: string) => void;
+  onOpenTopic: (id: string) => void;
 }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
   const ensured = useRef(false);
   const dumps = journal.dumps;
-  const linkableThreads = [...threads].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const linkableTopics = [...topics].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const latestDumpId = dumps[dumps.length - 1]?.id;
   const hasEmptyDump = dumps.some(isEmptyDump);
   const canWriteAgain = dumps.length > 0 && !hasEmptyDump;
@@ -54,7 +54,7 @@ export function TodayView({
           Good {greeting}.
         </h1>
         <p className="mt-2 mb-0 text-[13px] text-muted">
-          Dump your mind. Link a thread only if something stands out.
+          Dump your mind. Link a topic only if something stands out.
         </p>
       </div>
 
@@ -82,14 +82,14 @@ export function TodayView({
             key={dump.id}
             dump={dump}
             autoFocus={dump.id === latestDumpId && !dump.content}
-            threads={threads}
-            linkableThreads={linkableThreads}
+            topics={topics}
+            linkableTopics={linkableTopics}
             onChange={(content) => onUpdateDump(dump.id, content)}
             onRemove={() => onRemoveDump(dump.id)}
-            onCreateThread={(title) => onCreateThread(dump.id, title)}
-            onLinkThread={(threadId) => onLinkThread(dump.id, threadId)}
-            onUnlinkThread={(threadId) => onUnlinkThread(dump.id, threadId)}
-            onOpenThread={onOpenThread}
+            onCreateTopic={(title) => onCreateTopic(dump.id, title)}
+            onLinkTopic={(topicId) => onLinkTopic(dump.id, topicId)}
+            onUnlinkTopic={(topicId) => onUnlinkTopic(dump.id, topicId)}
+            onOpenTopic={onOpenTopic}
           />
         ))}
 

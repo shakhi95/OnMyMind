@@ -1,4 +1,4 @@
-import type { SearchResult, ThreadEventKind } from '../types';
+import type { SearchResult, TopicEventKind } from '../types';
 
 /** Quiet kind tones — distinguish without painting the UI. */
 export type KindTone =
@@ -10,7 +10,7 @@ export type KindTone =
   | 'task_reopened'
   | 'status'
   | 'dump'
-  | 'thread'
+  | 'topic'
   | 'journal';
 
 const TONE_CLASS: Record<KindTone, string> = {
@@ -22,7 +22,7 @@ const TONE_CLASS: Record<KindTone, string> = {
   task_reopened: 'border-[#2e3140] bg-[#1c1e28] text-[#a8acc4]',
   status: 'border-[#3a3224] bg-[#2a2418] text-[#d0b184]',
   dump: 'border-[#2c2e34] bg-[#18191e] text-[#8e909c]',
-  thread: 'border-[#2e3140] bg-[#1c1e28] text-accent',
+  topic: 'border-[#2e3140] bg-[#1c1e28] text-accent',
   journal: 'border-[#2c2e34] bg-[#18191e] text-soft',
 };
 
@@ -35,7 +35,7 @@ const DOT_CLASS: Record<KindTone, string> = {
   task_reopened: 'before:bg-[#a8acc4]',
   status: 'before:bg-[#d0b184]',
   dump: 'before:bg-[#8e909c]',
-  thread: 'before:bg-accent',
+  topic: 'before:bg-accent',
   journal: 'before:bg-soft',
 };
 
@@ -48,11 +48,11 @@ const DEFAULT_LABEL: Record<KindTone, string> = {
   task_reopened: 'Reopened',
   status: 'Status',
   dump: 'Dump',
-  thread: 'Thread',
+  topic: 'Topic',
   journal: 'Journal',
 };
 
-export function toneFromEventKind(kind: ThreadEventKind): KindTone {
+export function toneFromEventKind(kind: TopicEventKind): KindTone {
   switch (kind) {
     case 'thinking':
       return 'note';
@@ -73,7 +73,7 @@ export function toneFromEventKind(kind: ThreadEventKind): KindTone {
       return 'journal';
     case 'started':
     default:
-      return 'thread';
+      return 'topic';
   }
 }
 
@@ -82,7 +82,7 @@ export function toneFromSearchKind(kind: SearchResult['kind']): KindTone {
   if (kind === 'decision') return 'decision';
   if (kind === 'task') return 'task';
   if (kind === 'dump') return 'dump';
-  return 'thread';
+  return 'topic';
 }
 
 export function toneFromTaskLabel(label: string): KindTone {

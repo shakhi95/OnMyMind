@@ -1,6 +1,6 @@
 import { dayKey } from '../lib/dates';
-import { makeEvent, taskEventContent } from '../lib/threadEvents';
-import type { AppState, Dump, Journal, Task, Thread, ThreadEvent, ThreadEventKind } from '../types';
+import { makeEvent, taskEventContent } from '../lib/topicEvents';
+import type { AppState, Dump, Journal, Task, Topic, TopicEvent, TopicEventKind } from '../types';
 
 const iso = (daysAgo: number, hour: number, minute = 0) => {
   const date = new Date();
@@ -21,13 +21,13 @@ const dump = (
   id: string,
   content: string,
   createdAt: string,
-  threadIds: string[] = [],
+  topicIds: string[] = [],
 ): Dump => ({
   id,
   content,
   createdAt,
   updatedAt: createdAt,
-  threadIds,
+  topicIds,
 });
 
 const evt = (
@@ -36,9 +36,9 @@ const evt = (
   daysAgo: number,
   hour: number,
   minute = 0,
-  kind: ThreadEventKind = 'thinking',
-  extras: Partial<ThreadEvent> = {},
-): ThreadEvent =>
+  kind: TopicEventKind = 'thinking',
+  extras: Partial<TopicEvent> = {},
+): TopicEvent =>
   makeEvent(kind, content, {
     id,
     createdAt: iso(daysAgo, hour, minute),
@@ -47,17 +47,17 @@ const evt = (
   });
 
 const started = (id: string, daysAgo: number, hour: number, minute = 0) =>
-  evt(id, 'Thread started', daysAgo, hour, minute, 'started');
+  evt(id, 'Topic started', daysAgo, hour, minute, 'started');
 
 /**
  * Dense sample dataset spanning the last 15 days.
- * Covers dumps, optional empty dump, all thread statuses, decisions,
- * standalone + thread tasks, revisits, empty/sparse/heavy days.
+ * Covers dumps, optional empty dump, all topic statuses, decisions,
+ * standalone + topic tasks, revisits, empty/sparse/heavy days.
  */
 export function buildSampleState(): AppState {
-  const threads: Thread[] = [
+  const topics: Topic[] = [
     {
-      id: 'th-website',
+      id: 'tp-website',
       title: 'Personal website',
       status: 'active',
       createdAt: iso(14, 9),
@@ -72,7 +72,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-money',
+      id: 'tp-money',
       title: 'Money & runway',
       status: 'active',
       createdAt: iso(13, 8),
@@ -86,7 +86,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-move',
+      id: 'tp-move',
       title: 'Should I move?',
       status: 'later',
       createdAt: iso(12, 21),
@@ -99,7 +99,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-guitar',
+      id: 'tp-guitar',
       title: 'Learning guitar',
       status: 'later',
       createdAt: iso(11, 16),
@@ -112,7 +112,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-laptop',
+      id: 'tp-laptop',
       title: 'New laptop?',
       status: 'resolved',
       createdAt: iso(12, 10),
@@ -125,7 +125,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-conversation',
+      id: 'tp-conversation',
       title: 'That conversation',
       status: 'resolved',
       createdAt: iso(10, 22),
@@ -139,7 +139,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-side',
+      id: 'tp-side',
       title: 'Side project idea',
       status: 'dropped',
       createdAt: iso(9, 14),
@@ -152,7 +152,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-health',
+      id: 'tp-health',
       title: 'Sleep & energy',
       status: 'active',
       createdAt: iso(7, 7),
@@ -165,7 +165,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-family',
+      id: 'tp-family',
       title: "Mom's birthday",
       status: 'active',
       createdAt: iso(5, 12),
@@ -177,7 +177,7 @@ export function buildSampleState(): AppState {
       ],
     },
     {
-      id: 'th-career',
+      id: 'tp-career',
       title: 'Career direction',
       status: 'later',
       createdAt: iso(14, 18),
@@ -193,44 +193,44 @@ export function buildSampleState(): AppState {
 
   const journals: Record<string, Journal> = {};
 
-  // Day 14 — first heavy dump + thread birth
+  // Day 14 — first heavy dump + topic birth
   journals[key(14)] = {
     dumps: [
       dump(
         'd-14a',
         'Lots on my mind. Website, career, whether I am wasting time.\nI want a calmer system for this.',
-        iso(14, 8, 10), ['th-website', 'th-career']),
+        iso(14, 8, 10), ['tp-website', 'tp-career']),
     ],
   };
 
   // Day 13
   journals[key(13)] = {
     dumps: [
-      dump('d-13a', 'Money worry this morning. Need facts, not rumination.', iso(13, 7, 45), ['th-money']),
+      dump('d-13a', 'Money worry this morning. Need facts, not rumination.', iso(13, 7, 45), ['tp-money']),
     ],
   };
 
-  // Day 12 — dump with no thread links + move + laptop
+  // Day 12 — dump with no topic links + move + laptop
   journals[key(12)] = {
     dumps: [
       dump(
         'd-12a',
         'Quiet morning. Wondering about moving away.\nAlso: do I really need a new laptop?',
-        iso(12, 9, 0), ['th-move', 'th-laptop', 'th-guitar', 'th-career']),
+        iso(12, 9, 0), ['tp-move', 'tp-laptop', 'tp-guitar', 'tp-career']),
     ],
   };
 
   // Day 10 — conversation
   journals[key(10)] = {
     dumps: [
-      dump('d-10a', 'That conversation will not leave my head.', iso(10, 21, 10), ['th-conversation']),
+      dump('d-10a', 'That conversation will not leave my head.', iso(10, 21, 10), ['tp-conversation']),
     ],
   };
 
   // Day 9 — side project + laptop decision day spillover
   journals[key(9)] = {
     dumps: [
-      dump('d-9a', 'New idea for a side project. Tempting. Dangerous.', iso(9, 13, 20), ['th-side', 'th-laptop']),
+      dump('d-9a', 'New idea for a side project. Tempting. Dangerous.', iso(9, 13, 20), ['tp-side', 'tp-laptop']),
       dump('d-9b', '', iso(9, 19, 0)), // empty dump edge case
     ],
   };
@@ -238,16 +238,16 @@ export function buildSampleState(): AppState {
   // Day 8 — decision follow-through
   journals[key(8)] = {
     dumps: [
-      dump('d-8a', 'Sent the clarifying message. Breathing easier.', iso(8, 11, 0), ['th-conversation']),
+      dump('d-8a', 'Sent the clarifying message. Breathing easier.', iso(8, 11, 0), ['tp-conversation']),
     ],
   };
 
-  // Day 7 — health starts; dump-only no thread links
+  // Day 7 — health starts; dump-only no topic links
   journals[key(7)] = {
     dumps: [
       dump(
         'd-7a',
-        'Woke up exhausted. Sleep has been messy.\nJust dumping — no threads yet.',
+        'Woke up exhausted. Sleep has been messy.\nJust dumping — no topics yet.',
         iso(7, 6, 50),
       ),
     ],
@@ -256,62 +256,62 @@ export function buildSampleState(): AppState {
   // Day 6 — sparse
   journals[key(6)] = {
     dumps: [
-      dump('d-6a', 'Guitar crossed my mind while walking.', iso(6, 17, 10), ['th-guitar']),
+      dump('d-6a', 'Guitar crossed my mind while walking.', iso(6, 17, 10), ['tp-guitar']),
     ],
   };
 
   // Day 5 — family
   journals[key(5)] = {
     dumps: [
-      dump('d-5a', "Mom's birthday is coming. Want something meaningful.", iso(5, 12, 5), ['th-family', 'th-money']),
+      dump('d-5a', "Mom's birthday is coming. Want something meaningful.", iso(5, 12, 5), ['tp-family', 'tp-money']),
     ],
   };
 
   // Day 4 — move parked to later
   journals[key(4)] = {
     dumps: [
-      dump('d-4a', 'Not ready to decide about moving. Setting it aside on purpose.', iso(4, 21, 40), ['th-move']),
+      dump('d-4a', 'Not ready to decide about moving. Setting it aside on purpose.', iso(4, 21, 40), ['tp-move']),
     ],
   };
 
   // Day 3 — drop side project + sleep decision
   journals[key(3)] = {
     dumps: [
-      dump('d-3a', 'Capacity check: the side project has to go.', iso(3, 10, 0), ['th-side', 'th-health']),
-      dump('d-3b', 'Second dump tonight. Screens off experiment starts now.', iso(3, 22, 15), ['th-health']),
+      dump('d-3a', 'Capacity check: the side project has to go.', iso(3, 10, 0), ['tp-side', 'tp-health']),
+      dump('d-3b', 'Second dump tonight. Screens off experiment starts now.', iso(3, 22, 15), ['tp-health']),
     ],
   };
 
   // Day 2 — website progress
   journals[key(2)] = {
     dumps: [
-      dump('d-2a', 'Worked on homepage. Projects section still empty.', iso(2, 10, 30), ['th-website']),
+      dump('d-2a', 'Worked on homepage. Projects section still empty.', iso(2, 10, 30), ['tp-website']),
     ],
   };
 
   // Day 1
   journals[key(1)] = {
     dumps: [
-      dump('d-1a', 'Money spreadsheet updated. Website still calling.', iso(1, 18, 20), ['th-money', 'th-website']),
+      dump('d-1a', 'Money spreadsheet updated. Website still calling.', iso(1, 18, 20), ['tp-money', 'tp-website']),
     ],
   };
 
-  // Today (day 0) — multi dump, mix of new + revisit + one dump with no thread links
+  // Today (day 0) — multi dump, mix of new + revisit + one dump with no topic links
   journals[key(0)] = {
     dumps: [
       dump(
         'd-0a',
-        'Morning dump.\nSleep was better. Website and mom gift are loud today.\nLinking a few threads that stand out.',
-        iso(0, 7, 20), ['th-health', 'th-website', 'th-family']),
+        'Morning dump.\nSleep was better. Website and mom gift are loud today.\nLinking a few topics that stand out.',
+        iso(0, 7, 20), ['tp-health', 'tp-website', 'tp-family']),
       dump(
         'd-0b',
         'Afternoon: gift ideas spinning. Also buy toothpaste.',
         iso(0, 15, 45),
-        ['th-family'],
+        ['tp-family'],
       ),
       dump(
         'd-0c',
-        'Late dump with no thread links attached — testing optional empty dump.',
+        'Late dump with no topic links attached — testing optional empty dump.',
         iso(0, 22, 10),
       ),
     ],
@@ -322,7 +322,7 @@ export function buildSampleState(): AppState {
       id: 'task-domain',
       title: 'Buy domain for personal site',
       status: 'done',
-      threadId: 'th-website',
+      topicId: 'tp-website',
       createdAt: iso(10, 11),
       updatedAt: iso(7, 16),
     },
@@ -330,7 +330,7 @@ export function buildSampleState(): AppState {
       id: 'task-repo',
       title: 'Create website repository',
       status: 'done',
-      threadId: 'th-website',
+      topicId: 'tp-website',
       createdAt: iso(9, 12),
       updatedAt: iso(6, 14),
     },
@@ -338,21 +338,21 @@ export function buildSampleState(): AppState {
       id: 'task-homepage',
       title: 'Build homepage draft',
       status: 'open',
-      threadId: 'th-website',
+      topicId: 'tp-website',
       createdAt: iso(6, 15),
     },
     {
       id: 'task-projects',
       title: 'Write projects section',
       status: 'open',
-      threadId: 'th-website',
+      topicId: 'tp-website',
       createdAt: iso(2, 11),
     },
     {
       id: 'task-burn',
       title: 'Update monthly burn spreadsheet',
       status: 'done',
-      threadId: 'th-money',
+      topicId: 'tp-money',
       createdAt: iso(6, 9),
       updatedAt: iso(1, 18),
     },
@@ -360,21 +360,21 @@ export function buildSampleState(): AppState {
       id: 'task-gift',
       title: 'Order gift for mom',
       status: 'open',
-      threadId: 'th-family',
+      topicId: 'tp-family',
       createdAt: iso(5, 13),
     },
     {
       id: 'task-screens',
       title: 'Phone charger outside bedroom for two weeks',
       status: 'open',
-      threadId: 'th-health',
+      topicId: 'tp-health',
       createdAt: iso(3, 22, 30),
     },
     {
       id: 'task-clarify',
       title: 'Send clarifying message',
       status: 'done',
-      threadId: 'th-conversation',
+      topicId: 'tp-conversation',
       createdAt: iso(9, 10),
       updatedAt: iso(8, 11),
     },
@@ -402,15 +402,15 @@ export function buildSampleState(): AppState {
       id: 'task-side-mvp',
       title: 'Sketch side project MVP',
       status: 'dropped',
-      threadId: 'th-side',
+      topicId: 'tp-side',
       createdAt: iso(9, 15),
       updatedAt: iso(3, 10, 30),
     },
   ];
 
-  const withTaskEvents = threads.map((thread) => {
-    const related = tasks.filter((task) => task.threadId === thread.id);
-    const taskEvents: ThreadEvent[] = [];
+  const withTaskEvents = topics.map((topic) => {
+    const related = tasks.filter((task) => task.topicId === topic.id);
+    const taskEvents: TopicEvent[] = [];
     related.forEach((task) => {
       const created = new Date(task.createdAt);
       taskEvents.push(
@@ -433,13 +433,13 @@ export function buildSampleState(): AppState {
         );
       }
     });
-    if (!taskEvents.length) return thread;
-    const events = [...thread.events, ...taskEvents].sort((a, b) =>
+    if (!taskEvents.length) return topic;
+    const events = [...topic.events, ...taskEvents].sort((a, b) =>
       a.createdAt.localeCompare(b.createdAt),
     );
-    return { ...thread, events };
+    return { ...topic, events };
   });
 
-  return { journals, threads: withTaskEvents, tasks };
+  return { journals, topics: withTaskEvents, tasks };
 }
 

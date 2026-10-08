@@ -3,12 +3,12 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { KindChip, kindDotClass, toneFromEventKind } from '../components/KindChip';
 import { TaskRow } from '../components/TaskRow';
 import { ago, dateTimeText } from '../lib/dates';
-import { fieldClass, primaryBtnClass, THREAD_STATUS_CHIP } from '../lib/ui';
+import { fieldClass, primaryBtnClass, TOPIC_STATUS_CHIP } from '../lib/ui';
 import { draftKey, readDraft, writeDraft } from '../storage/storage';
-import type { Task, TaskStatus, Thread, ThreadEventKind, ThreadStatus } from '../types';
+import type { Task, TaskStatus, Topic, TopicEventKind, TopicStatus } from '../types';
 
-export function ThreadDetailView({
-  thread,
+export function TopicDetailView({
+  topic,
   tasks,
   setTaskStatus,
   addTask,
@@ -17,17 +17,17 @@ export function ThreadDetailView({
   onBack,
   onRevisit,
 }: {
-  thread: Thread;
+  topic: Topic;
   tasks: Task[];
   setTaskStatus: (id: string, status: TaskStatus) => void;
-  addTask: (title: string, threadId?: string) => void;
-  addNote: (id: string, content: string, kind?: Extract<ThreadEventKind, 'thinking' | 'decision'>) => void;
-  setStatus: (status: ThreadStatus) => void;
+  addTask: (title: string, topicId?: string) => void;
+  addNote: (id: string, content: string, kind?: Extract<TopicEventKind, 'thinking' | 'decision'>) => void;
+  setStatus: (status: TopicStatus) => void;
   onBack: () => void;
   onRevisit: () => void;
 }) {
-  const noteDraftKey = draftKey(thread.id, 'thinking');
-  const decisionDraftKey = draftKey(thread.id, 'decision');
+  const noteDraftKey = draftKey(topic.id, 'thinking');
+  const decisionDraftKey = draftKey(topic.id, 'decision');
   const [note, setNote] = useState(() => readDraft(noteDraftKey));
   const [decision, setDecision] = useState(() => readDraft(decisionDraftKey));
   const [task, setTask] = useState('');
@@ -57,17 +57,17 @@ export function ThreadDetailView({
       </button>
 
       <div className="text-[10px] font-bold tracking-[1.5px] text-accent uppercase">
-        A thread you've been carrying
+        A topic you've been carrying
       </div>
       <h1 className="mt-2 mb-2.5 font-display text-[31px] font-medium tracking-[-1px] text-ink max-[620px]:text-[25px]">
-        {thread.title}
+        {topic.title}
       </h1>
       <div className="mb-1 flex flex-wrap items-center gap-2.5 text-[10px] text-soft">
-        <span className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${THREAD_STATUS_CHIP[thread.status]}`}>
-          {thread.status}
+        <span className={`rounded-full px-2 py-1 text-[9px] tracking-[0.8px] uppercase ${TOPIC_STATUS_CHIP[topic.status]}`}>
+          {topic.status}
         </span>
-        <span>Started {dateTimeText(thread.createdAt)}</span>
-        <span>· Last on your mind {ago(thread.updatedAt)}</span>
+        <span>Started {dateTimeText(topic.createdAt)}</span>
+        <span>· Last on your mind {ago(topic.updatedAt)}</span>
       </div>
 
       {/* Compose */}
@@ -77,7 +77,7 @@ export function ThreadDetailView({
           onSubmit={(event) => {
             event.preventDefault();
             if (note.trim()) {
-              addNote(thread.id, note.trim());
+              addNote(topic.id, note.trim());
               setNote('');
             }
           }}
@@ -91,7 +91,7 @@ export function ThreadDetailView({
             value={note}
             onChange={(event) => setNote(event.target.value)}
             placeholder="Whatever's on your mind about this… No structure needed."
-            aria-label="Write a note about this thread"
+            aria-label="Write a note about this topic"
           />
           <span className={`mb-2 block text-[10px] ${draftSaved ? 'text-soft' : 'text-[#d4a18e]'}`}>
             {draftSaved
@@ -109,7 +109,7 @@ export function ThreadDetailView({
           onSubmit={(event) => {
             event.preventDefault();
             if (decision.trim()) {
-              addNote(thread.id, decision.trim(), 'decision');
+              addNote(topic.id, decision.trim(), 'decision');
               setDecision('');
             }
           }}
@@ -151,7 +151,7 @@ export function ThreadDetailView({
           onSubmit={(event) => {
             event.preventDefault();
             if (task.trim()) {
-              addTask(task, thread.id);
+              addTask(task, topic.id);
               setTask('');
             }
           }}
@@ -163,7 +163,7 @@ export function ThreadDetailView({
             value={task}
             onChange={(event) => setTask(event.target.value)}
             placeholder="Add an action, if there is one…"
-            aria-label="Add an action for this thread"
+            aria-label="Add an action for this topic"
             className={`mb-2 ${fieldClass} py-2.5`}
           />
           <div className="flex justify-end">
@@ -197,11 +197,11 @@ export function ThreadDetailView({
       {/* Timeline */}
       <section className="mt-5 border-t border-line pt-5">
         <div className="mb-3 text-[10px] font-bold tracking-[1.5px] text-soft uppercase">
-          Timeline · {thread.events.length}
+          Timeline · {topic.events.length}
         </div>
-        {thread.events.length ? (
+        {topic.events.length ? (
           <div>
-            {[...thread.events].reverse().map((item) => {
+            {[...topic.events].reverse().map((item) => {
               const tone = toneFromEventKind(item.kind);
               const isWriting = item.kind === 'thinking' || item.kind === 'decision';
               return (
@@ -233,21 +233,21 @@ export function ThreadDetailView({
 
       {/* Status */}
       <section className="mt-5 border-t border-line pt-5">
-        <div className="mb-3 text-[10px] font-bold tracking-[1.5px] text-soft uppercase">Where this thread is</div>
+        <div className="mb-3 text-[10px] font-bold tracking-[1.5px] text-soft uppercase">Where this topic is</div>
         <div className="flex flex-wrap gap-1.5">
-          {thread.status !== 'active' && (
+          {topic.status !== 'active' && (
             <OutlineButton onClick={() => setStatus('active')}>Bring back to active</OutlineButton>
           )}
-          {thread.status !== 'later' && (
+          {topic.status !== 'later' && (
             <OutlineButton onClick={() => setStatus('later')}>Set aside for later</OutlineButton>
           )}
-          {thread.status !== 'resolved' && (
+          {topic.status !== 'resolved' && (
             <OutlineButton onClick={() => setStatus('resolved')}>Mark resolved</OutlineButton>
           )}
           <button type="button" onClick={onRevisit} className={primaryBtnClass}>
             Bring into today’s journal <ArrowRight size={14} />
           </button>
-          {thread.status !== 'dropped' && (
+          {topic.status !== 'dropped' && (
             <OutlineButton danger onClick={() => setStatus('dropped')}>
               Let this go
             </OutlineButton>
